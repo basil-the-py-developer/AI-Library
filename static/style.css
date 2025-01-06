@@ -1,0 +1,202 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    color: #4CAF50;
+}
+
+form {
+    margin: 20px 0;
+}
+
+label {
+    margin-right: 10px;
+}
+
+input[type="text"], select {
+    padding: 10px;
+    margin: 10px 0;
+    width: 200px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin: 10px 0;
+}
+
+html, body {
+    height: 100%; 
+    margin: 0; 
+    display: flex;
+    flex-direction: column; 
+}
+
+.container {
+    flex: 1; 
+}
+
+.footer {
+    background-color: #282828; 
+    color: #E0DFCA; 
+    padding: 15px 0;
+    font-size: 0.9rem;
+    border-top: 1px solid #444;
+    width: 100%;
+    text-align: center; 
+    position: relative;
+    bottom: 0;
+}
+
+.footer a {
+    color: #FFD700; 
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 1200px) {
+    .container {
+        max-width: 750px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .form-group input[type="text"], .form-group select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .form-group input[type="text"], .form-group select {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px 20px;
+    }
+
+    ul {
+        padding-left: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .form-group input[type="text"], .form-group select {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .container {
+        padding: 10px;
+        max-width: 100%;
+    }
+
+    .form-group input[type="text"], .form-group select {
+        width: 100%;
+        padding: 8px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    ul {
+        padding-left: 20px;
+    }
+
+    .footer {
+        padding: 10px 0;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 375px) {
+    h1 {
+        font-size: 1.2rem;
+    }
+
+    .container {
+        padding: 8px;
+    }
+
+    .form-group input[type="text"], .form-group select {
+        width: 100%;
+        padding: 7px;
+    }
+
+    button {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    .footer {
+        padding: 10px 0;
+        font-size: 0.75rem;
+    }
+}
