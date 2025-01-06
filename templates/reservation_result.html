@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Result</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h3>Reservation Status</h3>
+    <div class="alert alert-info">
+        {{ message }}
+    </div>
+    
+    <!-- Dynamic Alert for reservation outcome -->
+    {% if "not confirmed" in message %}
+        {% if "maximum limit" in message %}
+            <div class="alert alert-danger">
+                Your reservation was not successful because you have already reserved the maximum allowed books (2). Please return one before reserving another.
+            </div>
+        {% else %}
+            <div class="alert alert-danger">
+                Your reservation was not successful because you are not an existing member of BEN Library. To become a member, borrow your first book directly from the library.
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-success">
+            Your reservation has been confirmed. Please pick it up within 24 hours to avoid cancellation.
+        </div>
+    {% endif %}
+    
+    <button class="btn btn-primary" onclick="window.location.href='/'">Go Back to Search</button>
+</div>
+
+<!-- Modal for reservation expiration or user information -->
+<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reservationModalLabel">Reservation Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if "not confirmed" in message %}
+                    {% if "maximum limit" in message %}
+                        Your reservation was not successful because you have already reserved the maximum allowed books (2). To reserve another, please return one of your current books.
+                    {% else %}
+                        Your reservation was not successful. Please ensure that you haven't exceeded your reservation limit.
+                    {% endif %}
+                {% else %}
+                    Your reservation is confirmed! Please pick up your book within 24 hours to avoid cancellation.
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS for Modal functionality -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Automatically show modal on page load -->
+<script>
+    var myModal = new bootstrap.Modal(document.getElementById('reservationModal'), {
+        keyboard: false
+    });
+    myModal.show();
+</script>
+
+</body>
+</html>
