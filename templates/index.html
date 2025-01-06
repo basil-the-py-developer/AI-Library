@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Search</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+       body {
+            background: linear-gradient(to right, violet, pink); /* Initial gradient background */
+            color: #E0DFCA; /* Text color */
+            font-family: 'Roboto', sans-serif; /* Font from Google Fonts */
+            display: flex; /* Flexbox for centering */
+            flex-direction: column; /* Column layout for content and footer */
+            justify-content: space-between; /* Push footer to the bottom */
+            min-height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default margin */
+            overflow-y: auto; /* Enable vertical scrolling when content overflows */
+            position: relative; /* For absolute positioning of the gradient effect */
+        }
+
+        /* Gradient effect with animation */
+        .gradient-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Watermark background */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 600px; /* Adjust size */
+            height: 600px;
+            background-image: url("{{ url_for('static', filename='lol.png') }}");
+            background-size: cover; /* Ensure it fills the size */
+            background-repeat: no-repeat; /* No tiling */
+            background-position: center; /* Center alignment */
+            opacity: .5; /* Subtle transparency */
+            pointer-events: none; /* Make it non-interactive */
+            transform: translate(-50%, -100%); /* Center the watermark */
+            z-index: 3; /* Behind all content */
+        }
+
+        /* Container styles */
+        .container {
+            background-color: rgba(18, 18, 18, 0.8); /* Dark background with transparency */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+            width: 100%; /* Full width for responsiveness */
+            max-width: 600px; /* Maximum width for the container */
+            position: relative; /* Relative positioning to bring it above the gradient */
+            z-index: 1; /* Bring the container above the watermark */
+            max-height: 80vh; /* Limit the height */
+            overflow-y: auto; /* Enable scrolling if content exceeds max height */
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif; /* Different font for heading */
+            color: #ffffff; /* White color for the heading */
+        }
+
+        .btn-primary {
+            background-color: #007bff; /* Bootstrap primary button color */
+            border: none; /* Remove border */
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .footer {
+            background-color: #282828; /* Dark footer background */
+            color: #E0DFCA; /* Light text color */
+            font-size: 0.9rem;
+            border-top: 1px solid #444;
+            width: 100%; /* Full width across the page */
+            text-align: center; /* Center the footer text */
+        }
+
+        .footer a {
+            color: #FFD700; /* Gold for links */
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        /* Navigation bar styles */
+        .navbar {
+            background-color: transparent; /* Transparent background */
+            padding: 10px 20px;
+        }
+
+        .navbar a {
+            color: #E0DFCA; /* Text color for links */
+            margin-right: 15px;
+            text-decoration: none;
+        }
+
+        .nav-item-nav-link {
+            color: #FFD700; /* Gold color on hover */
+        }
+
+        html {
+            scroll-behavior: smooth; /* Enable smooth scrolling */
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-effect"></div> <!-- Gradient effect layer -->
+    <div class="watermark"></div> <!-- Watermark layer -->
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="#"></a>
+        <div class="navbar-nav">
+            <a class="nav-item-nav-link" href="/reserve">Reserve a Book</a>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <h1 class="text-center">AI Integrated Student Book Guide</h1>
+        <form method="POST" class="mt-4">
+            <div class="form-group">
+                <label for="search_type">Select Search Type:</label>
+                <select class="form-control" id="search_type" name="search_type">
+                    <option value="Search by Book">Search by Book</option>
+                    <option value="Search by Author">Search by Author</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search_input">Enter Author/Book Name:</label>
+                <input type="text" class="form-control" id="search_input" name="search_input" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    
+    <footer class="footer">
+        <div class="container text-center py-3">
+            <p class="mb-0">Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
+            <p class="mb-0">
+                <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank" class="footer-link">Portfolio</a> |
+                <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank" class="footer-link">Connect on LinkedIn</a>
+            </p>
+            <p class="mb-0">© 2024 Swastha AI. All Rights Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

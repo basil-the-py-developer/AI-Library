@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            z-index: 0;
+            
+            color: #E0DFCA;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+         /* Gradient effect with animation */
+         .gradient-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Watermark background */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 30vw; /* Scale based on viewport width */
+            height: 30vw; /* Maintain aspect ratio */
+            max-width: 600px; /* Optional: limit the maximum size */
+            max-height: 600px;
+            background-image: url("{{ url_for('static', filename='lol.png') }}");
+            background-size: cover; /* Ensure it fills the size */
+            background-repeat: no-repeat; /* No tiling */
+            background-position: center; /* Center alignment */
+            opacity: 0.5; /* Subtle transparency */
+            pointer-events: none; /* Make it non-interactive */
+            transform: translate(-50%, -110%); 
+            z-index: 3; /* Behind all content */
+        }
+
+        /* Optional: Media queries for finer control */
+        @media (max-width: 768px) {
+            .watermark {
+                width: 40vw; /* Slightly smaller for smaller screens */
+                height: 40vw;
+                transform: translate(-50%, -110%); 
+            }
+        }
+
+        @media (max-width: 480px) {
+            .watermark {
+                width: 50vw; /* Even smaller for very small screens */
+                height: 50vw;
+                transform: translate(-50%, -70%);
+            }  
+        }
+
+
+        .container {
+            background-color: rgba(18, 18, 18, 0.8); 
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 1; /* Bring the container above the watermark */
+            max-height: 80vh; /* Limit the height */
+            overflow-y: auto; /* Enable scrolling if content exceeds max height */
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff; 
+        }
+
+        .text-black {
+            color: white; 
+        }
+
+        .container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        pre {
+            color: #E0DFCA;
+            font-size: 1.0rem;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: hidden;
+            max-width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: Georgia, 'Times New Roman', Times, serif 
+        }
+
+        .footer {
+            color: #E0DFCA; 
+            padding: 15px 0;
+            font-size: 0.9rem;
+            width: 100%;
+            text-align: center; 
+        }
+
+        .footer a {
+            color: #FFD700;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .list-group-item {
+            background-color: dimgray; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            padding: 15px;
+        }
+
+        .list-group-item strong {
+            color: white; 
+        }
+
+        .list-group-item a {
+            color: #FFD700; 
+            text-decoration: none;
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            display: inline-block; /* Ensure the link does not break onto multiple lines */
+        }
+
+        .list-group-item a:hover {
+            text-decoration: underline;
+        }
+
+        .navbar {
+            background-color: FFFFFF; 
+            padding: 10px 20px;
+        }
+
+        .navbar a {
+            color: #E0DFCA;
+            margin-right: 15px;
+            text-decoration: none;
+        }
+
+        .nav-item-nav-link {
+            color: #FFD700;
+        }
+
+        /* Ensure links are responsive and truncate on smaller screens */
+        .link-box a {
+            display: block;
+            color: #FFD700;
+            text-decoration: none;
+            word-wrap: break-word;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 576px) {
+            .link-box a {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap; 
+                width: 100%; /* Ensure full width */
+            }
+
+            .list-group-item {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .list-group-item {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-effect"></div> <!-- Gradient effect layer -->
+    <div class="watermark"></div> <!-- Watermark layer -->
+    <div class="gradient-effect"></div>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="#"></a>
+        <div class="navbar-nav">
+            <a class="nav-item-nav-link" href="/reserve">Reserve a Book</a>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="mt-4 text-black">
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% else %}
+                {% if results|length == 0 %}
+                    <div class="alert alert-info">No results found in the library for your search.</div>
+                {% else %}
+                    <h4>Books:</h4>
+                    <ul class="list-group">
+                        {% for result in results %}
+                            <li class="list-group-item text-black">
+                                <strong>Book Name:</strong> {{ result.bk_name }}<br>
+                                <strong>Book ID:</strong> {{ result.bk_id }}<br>
+                                <strong>Status:</strong> {{ result.bk_status }}<br>
+                                {% if result.bk_status == 'Issued' %}
+                                    <strong>Available by:</strong> {{ result.due_date }}<br>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <h4 class="mt-4">Generated Information:</h4>
+                <pre class="text-black">{{ generated_info }}</pre>
+                
+                {% if links|length > 0 %}
+                    <h4 class="mt-4">Related Links:</h4>
+                    <ul class="list-group">
+                        {% for link in links %}
+                            <li class="list-group-item text-black">
+                                <a href="{{ link }}" target="_blank" title="{{ link }}">{{ link|truncate(35, True) }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endif %}
+        </div>
+        <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Back to Search</a>
+    </div>
+    <footer class="footer">
+        <div class="container text-center py-3">
+            <p class="mb-0">Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
+            <p class="mb-0">
+                <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank" class="footer-link">Portfolio</a> |
+                <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank" class="footer-link">Connect on LinkedIn</a>
+            </p>
+            <p class="mb-0">© 2024 Swastha AI. All Rights Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
