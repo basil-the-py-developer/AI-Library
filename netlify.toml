@@ -1,5 +1,5 @@
 [build]
-  command = "apt-get install -y libpq-dev && pip install -r requirements.txt && python app.py"
+  command = "apt-get install libpq-dev python3-dev postgresql-server-dev-all && pip install -r requirements.txt && python app.py"
   publish = "public"
   functions = "functions"
 
