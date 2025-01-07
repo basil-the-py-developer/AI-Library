@@ -174,62 +174,80 @@ def result():
 
 
 @app.route('/reserve', methods=['GET', 'POST'])
+
+
 def reserve_book():
     # Initialize the db connection and cursor outside of the method block
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
 
     if request.method == 'GET':
-        # Fetch available books (books with BOOK_STATUS = "Available")
-        query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
-        cursor.execute(query)
-        books = cursor.fetchall()
+        try:
+            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
+            cursor.execute(query)
+            books = cursor.fetchall()
 
-        return render_template('reserve.html', books=books)
+            # Log the fetched books for debugging
+            app.logger.info(f"Books fetched: {books}")
+            
+            # Return the list of available books to the user
+            return render_template('reserve.html', books=books)
+        
+        except Exception as e:
+            # Log the error and return a message to the user
+            app.logger.error(f"Error during database fetch: {e}")
+            return "Error fetching books", 500
 
     if request.method == 'POST':
-        book_id = request.form.get('book_id').strip()
-        user_name = request.form.get('user_name').strip()
-        contact = request.form.get('contact').strip()
-        card_id = request.form.get('card_id').strip()  # Card ID to identify the user
+        try:
+            book_id = request.form.get('book_id').strip()
+            user_name = request.form.get('user_name').strip()
+            contact = request.form.get('contact').strip()
+            card_id = request.form.get('card_id').strip()  # Card ID to identify the user
 
-        # Check if the user exists in the user_data database
-        query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""  # Assuming the table is 'user'
-        cursor.execute(query, (card_id,))
-        user = cursor.fetchone()
-
-        if user:
-            # Check the count of books already reserved by the user
-            query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
+            # Check if the user exists in the user_data database
+            query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""
             cursor.execute(query, (card_id,))
-            reserved_count = cursor.fetchone()[0]
+            user = cursor.fetchone()
 
-            if reserved_count >= 2:
-                message = "Reservation not confirmed. You have already reserved 2 books, which is the maximum limit."
-            else:
-                # Check if the book is available
-                query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s;"""
-                cursor.execute(query, (book_id,))
-                book = cursor.fetchone()
+            if user:
+                # Check the count of books already reserved by the user
+                query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
+                cursor.execute(query, (card_id,))
+                reserved_count = cursor.fetchone()[0]
 
-                if book:
-                    bk_name, bk_status = book
-                    if bk_status == "Available":
-                        # Update book status to "Reserved" and set the user CARD_ID
-                        query = """UPDATE "library" SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s WHERE "BK_ID" = %s ;"""
-                        cursor.execute(query, (card_id, book_id))
-
-                        message = f"The book '{bk_name}' has been reserved successfully!"
-                    else:
-                        message = f"Sorry, the book '{bk_name}' is currently not available."
+                if reserved_count >= 2:
+                    message = "Reservation not confirmed. You have already reserved 2 books, which is the maximum limit."
                 else:
-                    message = "Book ID not found. Please check and try again."
-        else:
-            message = (
-                "Reservation not confirmed. You are not an existing member of BEN Library. "
-                "To become a member, borrow your first book directly from the library."
-            )
+                    # Check if the book is available
+                    query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s;"""
+                    cursor.execute(query, (book_id,))
+                    book = cursor.fetchone()
 
+                    if book:
+                        bk_name, bk_status = book
+                        if bk_status == "Available":
+                            # Update book status to "Reserved" and set the user CARD_ID
+                            query = """UPDATE "library" SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s WHERE "BK_ID" = %s ;"""
+                            cursor.execute(query, (card_id, book_id))
+
+                            message = f"The book '{bk_name}' has been reserved successfully!"
+                        else:
+                            message = f"Sorry, the book '{bk_name}' is currently not available."
+                    else:
+                        message = "Book ID not found. Please check and try again."
+            else:
+                message = (
+                    "Reservation not confirmed. You are not an existing member of BEN Library. "
+                    "To become a member, borrow your first book directly from the library."
+                )
+        
+        except Exception as e:
+            # Log the error during POST and return a message to the user
+            app.logger.error(f"Error during reservation process: {e}")
+            message = "An error occurred while processing your reservation."
+
+        # Close the database connection and cursor after handling POST request
         cursor.close()
         db_connection.close()
 
