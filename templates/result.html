@@ -32,8 +32,7 @@
             position: relative;
         }
 
-         /* Gradient effect with animation */
-         .gradient-effect {
+        .gradient-effect {
             position: absolute;
             top: 0;
             left: 0;
@@ -57,54 +56,19 @@
             }
         }
 
-        /* Watermark background */
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 30vw; /* Scale based on viewport width */
-            height: 30vw; /* Maintain aspect ratio */
-            max-width: 600px; /* Optional: limit the maximum size */
-            max-height: 600px;
-            background-image: url("{{ url_for('static', filename='lol.png') }}");
-            background-size: cover; /* Ensure it fills the size */
-            background-repeat: no-repeat; /* No tiling */
-            background-position: center; /* Center alignment */
-            opacity: 0.5; /* Subtle transparency */
-            pointer-events: none; /* Make it non-interactive */
-            transform: translate(-50%, -110%); 
-            z-index: 3; /* Behind all content */
-        }
-
-        /* Optional: Media queries for finer control */
-        @media (max-width: 768px) {
-            .watermark {
-                width: 40vw; /* Slightly smaller for smaller screens */
-                height: 40vw;
-                transform: translate(-50%, -110%); 
-            }
-        }
-
-        @media (max-width: 480px) {
-            .watermark {
-                width: 50vw; /* Even smaller for very small screens */
-                height: 50vw;
-                transform: translate(-50%, -70%);
-            }  
-        }
-
-
         .container {
             background-color: rgba(18, 18, 18, 0.8); 
-            padding: 30px;
+            padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             position: relative;
-            z-index: 1; /* Bring the container above the watermark */
-            max-height: 80vh; /* Limit the height */
-            overflow-y: auto; /* Enable scrolling if content exceeds max height */
+            z-index: 1;
+            max-height: 95vh; 
+            height: 95%; 
+            margin-top: 10px; 
+            overflow-y: auto;
         }
 
         h1 {
@@ -121,61 +85,63 @@
         }
 
         .container::-webkit-scrollbar-thumb {
-            background: #888;
+            background: #545454;
             border-radius: 10px;
         }
 
         .container::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #232323;
         }
 
         .container::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: whitesmoke;
             border-radius: 10px;
         }
 
         .btn-primary {
-            background-color: #007bff;
-            border: none;
+            background-color: transparent;
+            color: #E0DFCA;
+            border: 2px solid #E0DFCA;
+            border-radius: 25px;
+            padding: 12px 25px;
+            font-size: 18px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color: #E0DFCA;
+            color: #333333;
         }
 
         pre {
             color: #E0DFCA;
             font-size: 1.0rem;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-x: hidden;
             max-width: 100%;
-            max-height: 200px;
+            max-height: 400px;
             overflow-y: auto;
             font-family: Georgia, 'Times New Roman', Times, serif 
         }
-
-        .footer {
-            color: #E0DFCA; 
-            padding: 15px 0;
-            font-size: 0.9rem;
-            width: 100%;
-            text-align: center; 
+        pre::-webkit-scrollbar {
+        width: 8px; /* Width of the scrollbar */
         }
 
-        .footer a {
-            color: #FFD700;
-            text-decoration: none;
+        pre::-webkit-scrollbar-thumb {
+            background: #a068d5; /* Color of the scrollbar thumb */
+            border-radius: 10px; /* Rounded corners */
         }
 
-        .footer a:hover {
-            text-decoration: underline;
+        pre::-webkit-scrollbar-thumb:hover {
+            background: #6532a8; /* Darker color on hover */
         }
 
-        .footer p {
-            margin: 5px 0;
+        pre::-webkit-scrollbar-track {
+            background: whitesmoke; /* Track background color */
+            border-radius: 10px; /* Rounded corners for the track */
         }
 
         .list-group-item {
@@ -197,7 +163,7 @@
             overflow: hidden;
             text-overflow: ellipsis; 
             white-space: nowrap; 
-            display: inline-block; /* Ensure the link does not break onto multiple lines */
+            display: inline-block;
         }
 
         .list-group-item a:hover {
@@ -205,57 +171,38 @@
         }
 
         .navbar {
-            background-color: FFFFFF; 
-            padding: 10px 20px;
+            background-color: transparent;
+            padding: 20px 30px; 
+            height: 80px; 
         }
 
         .navbar a {
-            color: #E0DFCA;
-            margin-right: 15px;
-            text-decoration: none;
+        color: #E0DFCA;
+        text-decoration: none;
+        font-size: 16px; /* Reduced font size */
+        padding: 8px 16px; /* Reduced padding */
+        background-color: rgba(0, 0, 139, 0.6); /* Dark blue transparent background */
+        border-radius: 6px; /* Slightly rounded corners */
+        transition: background-color 0.3s, transform 0.3s;
         }
 
-        .nav-item-nav-link {
-            color: #FFD700;
+        .navbar a:hover {
+            background-color: rgba(0, 0, 139, 0.8); /* Darker on hover */
+            transform: scale(1.05); /* Slight scaling effect on hover */
         }
 
-        /* Ensure links are responsive and truncate on smaller screens */
-        .link-box a {
-            display: block;
-            color: #FFD700;
-            text-decoration: none;
-            word-wrap: break-word;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
 
-        @media (max-width: 576px) {
-            .link-box a {
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap; 
-                width: 100%; /* Ensure full width */
-            }
-
-            .list-group-item {
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .list-group-item {
-                font-size: 16px;
-            }
+        footer {
+            height: 20px; 
+            background-color: transparent;
+            margin-top: auto;
         }
     </style>
 </head>
 <body>
-    <div class="gradient-effect"></div> <!-- Gradient effect layer -->
-    <div class="watermark"></div> <!-- Watermark layer -->
+    <div class="gradient-effect"></div> 
     <div class="gradient-effect"></div>
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <a class="navbar-brand" href="#"></a>
         <div class="navbar-nav">
             <a class="nav-item-nav-link" href="/reserve">Reserve a Book</a>
         </div>
@@ -299,15 +246,6 @@
         </div>
         <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Back to Search</a>
     </div>
-    <footer class="footer">
-        <div class="container text-center py-3">
-            <p class="mb-0">Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
-            <p class="mb-0">
-                <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank" class="footer-link">Portfolio</a> |
-                <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank" class="footer-link">Connect on LinkedIn</a>
-            </p>
-            <p class="mb-0">© 2024 Swastha AI. All Rights Reserved.</p>
-        </div>
-    </footer>
+    <footer></footer> 
 </body>
 </html>
