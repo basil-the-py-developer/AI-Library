@@ -1,30 +1,24 @@
 from flask import Flask, render_template, request, redirect, url_for
-import mysql.connector
 import google.generativeai as genai
 from googlesearch import search
+import psycopg2
 import os
 
 app = Flask(__name__)
-
+database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
+
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.0-flash-exp")
 
 def connect_to_library_db():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="helon@123",
-        database="library_db"
-    )
-
-def connect_to_():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="helon@123",
-        database="library_db"
-    )
+    return psycopg2.connect(
+            host="aws-0-ap-southeast-1.pooler.supabase.com",  # E.g., localhost or an IP address
+            database="postgres",                             # Your database name
+            user="postgres.fxtisfulbcghgrljxblf", 
+            port="6543",                                     # Your port
+            password=f"{database_password}"                             # Your password
+        )
 
 def clean_response(response_text):
     cleaned_text = response_text.replace("*", "").replace("#", "").strip()
@@ -32,7 +26,11 @@ def clean_response(response_text):
 
 def get_suggested_input(input_text):
     # Use AI to get a suggestion for corrected input
-    response = model.generate_content(f"Suggest a correctly spelled version of this text: {input_text}")
+    response = model.generate_content(f"provide a correctly spelled version of this text: '{input_text}'."
+                                       "if the text consists of random letters that is not meaningful in any language "
+                                       "keep the text as it is, else give the corrected spelling version. "
+                                       "Do not output anything other than the corrected version of the text."
+    )
 
     return clean_response(response.text)
 
@@ -70,8 +68,8 @@ def result():
     links = []
 
     if search_type == "Search by Author":
-        query = "SELECT BK_NAME, BK_ID, BK_STATUS, DUE_DATE FROM Library WHERE UPPER(AUTHOR_NAME) LIKE %s"
-        cursor.execute(query, (f"%{search_input_upper}%",))
+        query = """SELECT  "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME" FROM library WHERE levenshtein_less_equal("AUTHOR_NAME", %s, 2) <= 2 OR "AUTHOR_NAME" ILIKE %s ;"""
+        cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
         books = cursor.fetchall()
 
         if books:
@@ -83,20 +81,23 @@ def result():
                     "bk_status": bk_status,
                     "due_date": due_date
                 })
-            cleaned_response = f"Books by author '{search_input}' are available."
+            
         else:
-            # Handle the case where no books are found
-            response = model.generate_content(
-                f"Get details about the author {search_input} and the books. If no details are found, just say 'No results.'"
-            )
-            cleaned_response = clean_response(response.text)
+            pass
+        # Handle the case where no books are found
+        response = model.generate_content(
+            f"Get details about the author {search_input} and books by the author."
+            "If the author name is invalid or not found include 'No Information found about the author' in your response."
+    
+        )
+        cleaned_response = clean_response(response.text)
 
-            if cleaned_response.lower() == "no results.":
-                # If AI says no results, perform a web search
-                links = list(search(f"get details about the author {search_input_upper}", tld="com", num=10, stop=10, pause=2))
-                cleaned_response = "No results found. Refer to the related links below."
+        if "No Information found about the author" in cleaned_response:
+            # If AI says no results, perform a web search
+            links = list(search(f"Details about the author '{search_input_upper}'", num_results=3))
+            cleaned_response = f"No results found for the author '{search_input}'. Refer to the related links below."
 
-        # Ensure we always return a response for "Search by Author"
+        # return a response for Search by Author
         return render_template(
             'result.html',
             results=results,
@@ -108,45 +109,44 @@ def result():
 
 
     elif search_type == "Search by Book":
-        query = "SELECT BK_NAME, BK_ID, BK_STATUS, AUTHOR_NAME, DUE_DATE FROM Library WHERE UPPER(BK_NAME) LIKE %s"
-        cursor.execute(query, (f"%{search_input_upper}%",))
+        query = """SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME" FROM library WHERE levenshtein_less_equal("BK_NAME", %s, 2) <= 2 OR "BK_NAME" ILIKE %s """
+        cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
         books = cursor.fetchall()
 
         results = []
         if books:
             for book in books:
-                bk_name, bk_id, bk_status, author_name, due_date = book
+                bk_name, bk_id, bk_status, author_name = book
                 output = {
                     "bk_name": bk_name,
                     "author_name": author_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
-                    "due_date": due_date
+                   
                 }
                 results.append(output)
 
-            book_names = [book[0] for book in books]
         else:
-            book_names = []
-            if book_names== []:
-                book_names=search_input
+            pass
 
         # Generate AI response about the book and the author regardless of book presence
         response = model.generate_content(
-            f"Get a summary of the book '{search_input}'  and information about the author. "
-            "If a summary is not available, get the output as 'No summary found'."
+            f"Get a summary of the book '{search_input}' and information about the author. "
+             "nothing other than the summary of the book and information about the author should be included in the output."
+             "present the summary in a beautiful and readable format."
+             "If the book name is invalid or not found include 'No summary found' in your response."
         )
         
         cleaned_response = clean_response(response.text)
+        print(cleaned_response)
 
         
 
         if "No summary found" in cleaned_response:
             bk_links = []
             # Search online for additional details when no summary is found
-            for i in search(f"Get summary of  the book '{search_input.upper()}'", tld="com", num=10, stop=10, pause=2):
-                bk_links.append(i)
-
+            bk_links = list(search(f"Get summary of the book '{search_input_upper}'", num_results=5))
+        
             # Update response to include a note about related links
             cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
 
@@ -171,37 +171,19 @@ def result():
     cursor.close()
     db_connection.close()
 
-def connect_to_library_db():
-    """Connect to the library database."""
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="helon@123",
-        database="library_db"
-    )
 
-def connect_to_user_db():
-    """Connect to the user_data database."""
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="helon@123",
-        database="user_data"
-    )
 
 @app.route('/reserve', methods=['GET', 'POST'])
 def reserve_book():
-    if request.method == 'GET':
-        db_connection = connect_to_library_db()
-        cursor = db_connection.cursor()
+    # Initialize the db connection and cursor outside of the method block
+    db_connection = connect_to_library_db()
+    cursor = db_connection.cursor()
 
-        # Fetch available books (books with BK_STATUS = "Available")
-        query = "SELECT BK_ID, BK_NAME, AUTHOR_NAME, BK_STATUS FROM Library WHERE BK_STATUS = 'Available'"
+    if request.method == 'GET':
+        # Fetch available books (books with BOOK_STATUS = "Available")
+        query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
         cursor.execute(query)
         books = cursor.fetchall()
-
-        cursor.close()
-        db_connection.close()
 
         return render_template('reserve.html', books=books)
 
@@ -211,61 +193,49 @@ def reserve_book():
         contact = request.form.get('contact').strip()
         card_id = request.form.get('card_id').strip()  # Card ID to identify the user
 
-        # Connect to user_data database to check for membership
-        user_db_connection = connect_to_user_db()
-        user_cursor = user_db_connection.cursor()
-
         # Check if the user exists in the user_data database
-        user_query = "SELECT CARD_ID FROM user WHERE CARD_ID = %s"  # Assuming the table is 'user'
-        user_cursor.execute(user_query, (card_id,))
-        user = user_cursor.fetchone()
+        query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""  # Assuming the table is 'user'
+        cursor.execute(query, (card_id,))
+        user = cursor.fetchone()
 
         if user:
-            # User exists, now check the library database
-            library_db_connection = connect_to_library_db()
-            library_cursor = library_db_connection.cursor()
-
             # Check the count of books already reserved by the user
-            count_query = "SELECT COUNT(*) FROM Library WHERE BK_STATUS = 'Reserved' AND CARD_ID = %s"
-            library_cursor.execute(count_query, (card_id,))
-            reserved_count = library_cursor.fetchone()[0]
+            query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
+            cursor.execute(query, (card_id,))
+            reserved_count = cursor.fetchone()[0]
 
             if reserved_count >= 2:
                 message = "Reservation not confirmed. You have already reserved 2 books, which is the maximum limit."
-
             else:
                 # Check if the book is available
-                book_query = "SELECT BK_NAME, BK_STATUS FROM Library WHERE BK_ID = %s"
-                library_cursor.execute(book_query, (book_id,))
-                book = library_cursor.fetchone()
+                query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s;"""
+                cursor.execute(query, (book_id,))
+                book = cursor.fetchone()
 
                 if book:
                     bk_name, bk_status = book
                     if bk_status == "Available":
                         # Update book status to "Reserved" and set the user CARD_ID
-                        update_query = "UPDATE Library SET BK_STATUS = 'Reserved', CARD_ID = %s WHERE BK_ID = %s"
-                        library_cursor.execute(update_query, (card_id, book_id))
-                        library_db_connection.commit()
+                        query = """UPDATE "library" SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s WHERE "BK_ID" = %s ;"""
+                        cursor.execute(query, (card_id, book_id))
 
                         message = f"The book '{bk_name}' has been reserved successfully!"
                     else:
                         message = f"Sorry, the book '{bk_name}' is currently not available."
                 else:
                     message = "Book ID not found. Please check and try again."
-
-            library_cursor.close()
-            library_db_connection.close()
         else:
             message = (
                 "Reservation not confirmed. You are not an existing member of BEN Library. "
                 "To become a member, borrow your first book directly from the library."
             )
 
-        user_cursor.close()
-        user_db_connection.close()
+        cursor.close()
+        db_connection.close()
 
         return render_template('reservation_result.html', message=message)
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
