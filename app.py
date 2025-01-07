@@ -138,8 +138,6 @@ def result():
         )
         
         cleaned_response = clean_response(response.text)
-        print(cleaned_response)
-
         
 
         if "No summary found" in cleaned_response:
