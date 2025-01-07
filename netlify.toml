@@ -1,5 +1,5 @@
 [build]
-  command = "whoami && pip cache purge && pip install psycopg2-binary==2.9.10 && pip install -r requirements.txt  && python app.py"
+  command = "pip install psycopg2-binary==2.9.10 && pip install -r requirements.txt "
   publish = "public"
   functions = "functions"
 
