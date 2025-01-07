@@ -7,20 +7,19 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
-       body {
-            background: linear-gradient(to right, violet, pink); /* Initial gradient background */
-            color: #E0DFCA; /* Text color */
-            font-family: 'Roboto', sans-serif; /* Font from Google Fonts */
-            display: flex; /* Flexbox for centering */
-            flex-direction: column; /* Column layout for content and footer */
-            justify-content: space-between; /* Push footer to the bottom */
-            min-height: 100vh; /* Full viewport height */
-            margin: 0; /* Remove default margin */
-            overflow-y: auto; /* Enable vertical scrolling when content overflows */
-            position: relative; /* For absolute positioning of the gradient effect */
+        body {
+            background: linear-gradient(to right, violet, pink);
+            color: #E0DFCA;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100vh;
+            margin: 0;
+            overflow-y: auto;
+            position: relative;
         }
 
-        /* Gradient effect with animation */
         .gradient-effect {
             position: absolute;
             top: 0;
@@ -45,62 +44,38 @@
             }
         }
 
-        /* Watermark background */
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 600px; /* Adjust size */
-            height: 600px;
-            background-image: url("{{ url_for('static', filename='lol.png') }}");
-            background-size: cover; /* Ensure it fills the size */
-            background-repeat: no-repeat; /* No tiling */
-            background-position: center; /* Center alignment */
-            opacity: .5; /* Subtle transparency */
-            pointer-events: none; /* Make it non-interactive */
-            transform: translate(-50%, -100%); /* Center the watermark */
-            z-index: 3; /* Behind all content */
-        }
+    
 
-        /* Container styles */
         .container {
-            background-color: rgba(18, 18, 18, 0.8); /* Dark background with transparency */
-            padding: 30px;
+            background-color: rgba(18, 18, 18, 0.8);
+            padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow for depth */
-            width: 100%; /* Full width for responsiveness */
-            max-width: 600px; /* Maximum width for the container */
-            position: relative; /* Relative positioning to bring it above the gradient */
-            z-index: 1; /* Bring the container above the watermark */
-            max-height: 80vh; /* Limit the height */
-            overflow-y: auto; /* Enable scrolling if content exceeds max height */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            z-index: 1;
+            max-height: 100vh;
+            height: 100%;
+            overflow-y: auto;
         }
 
         h1 {
-            font-family: 'Poppins', sans-serif; /* Different font for heading */
-            color: #ffffff; /* White color for the heading */
-        }
-
-        .btn-primary {
-            background-color: #007bff; /* Bootstrap primary button color */
-            border: none; /* Remove border */
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3; /* Darker blue on hover */
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
         }
 
         .footer {
-            background-color: #282828; /* Dark footer background */
-            color: #E0DFCA; /* Light text color */
+            background-color: #282828;
+            color: #E0DFCA;
             font-size: 0.9rem;
             border-top: 1px solid #444;
-            width: 100%; /* Full width across the page */
-            text-align: center; /* Center the footer text */
+            width: 100%;
+            text-align: center;
         }
 
         .footer a {
-            color: #FFD700; /* Gold for links */
+            color: #FFD700;
             text-decoration: none;
         }
 
@@ -112,39 +87,40 @@
             margin: 5px 0;
         }
 
-        /* Navigation bar styles */
         .navbar {
-            background-color: transparent; /* Transparent background */
+            background-color: transparent;
             padding: 10px 20px;
         }
 
         .navbar a {
-            color: #E0DFCA; /* Text color for links */
-            margin-right: 15px;
+            color: #E0DFCA;
             text-decoration: none;
+            font-size: 16px; /* Reduced font size */
+            padding: 8px 16px; /* Adjusted padding */
+            background-color: rgba(0, 0, 139, 0.6); /* Dark blue transparent background */
+            border-radius: 6px; /* Slightly rounded corners */
+            transition: background-color 0.3s, transform 0.3s;
         }
 
-        .nav-item-nav-link {
-            color: #FFD700; /* Gold color on hover */
+        .navbar a:hover {
+            background-color: rgba(0, 0, 139, 0.8); /* Darker blue on hover */
+            transform: scale(1.05); /* Slight scaling effect */
         }
 
         html {
-            scroll-behavior: smooth; /* Enable smooth scrolling */
+            scroll-behavior: smooth;
         }
     </style>
 </head>
 <body>
-    <div class="gradient-effect"></div> <!-- Gradient effect layer -->
-    <div class="watermark"></div> <!-- Watermark layer -->
+    <div class="gradient-effect"></div>
 
-    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <a class="navbar-brand" href="#"></a>
         <div class="navbar-nav">
             <a class="nav-item-nav-link" href="/reserve">Reserve a Book</a>
         </div>
     </nav>
-    
+
     <div class="container mt-5">
         <h1 class="text-center">AI Integrated Student Book Guide</h1>
         <form method="POST" class="mt-4">
@@ -162,7 +138,7 @@
             <button type="submit" class="btn btn-primary">Search</button>
         </form>
     </div>
-    
+
     <footer class="footer">
         <div class="container text-center py-3">
             <p class="mb-0">Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
