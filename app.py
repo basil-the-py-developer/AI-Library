@@ -184,9 +184,6 @@ def reserve_book():
             query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
             cursor.execute(query)
             books = cursor.fetchall()
-
-            # Log the fetched books for debugging
-            app.logger.info(f"Books fetched: {books}")
             
             # Return the list of available books to the user
             return render_template('reserve.html', books=books)
