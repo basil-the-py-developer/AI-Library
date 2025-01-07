@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ]
+  ],
+  "env": {
+    "GOOGLE_APPLICATION_CREDENTIALS": "/dev/null",
+    "FLASK_ENV": "production",
+    "SECRET_KEY": "your-secret-key"
+  }
 }
