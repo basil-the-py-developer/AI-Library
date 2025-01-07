@@ -1,6 +1,6 @@
 [build]
   command = "pip install psycopg2-binary==2.9.10 && pip install -r requirements.txt "
-  publish = "public"
+  publish = "."
   functions = "functions"
 
 [[redirects]]
