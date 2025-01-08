@@ -224,7 +224,7 @@ def reserve_book():
                         if bk_status == "Available":
                             # Update book status to "Reserved" and set the user CARD_ID
                             query = """UPDATE "library" SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s WHERE "BK_ID" = %s ;"""
-                            cursor.execute(query, (card_id, book_id))
+                            cursor.execute(query, (f"{card_id}", f"'{book_id}'"))
 
                             message = f"The book '{bk_name}' has been reserved successfully!"
                         else:
