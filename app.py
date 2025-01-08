@@ -208,7 +208,7 @@ def reserve_book():
             if user:
                 # Check the count of books already reserved by the user
                 query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
-                cursor.execute(query, (card_id))
+                cursor.execute(query, (card_id,))
                 reserved_count = cursor.fetchone()[0]
 
                 if reserved_count >= 2:
@@ -216,7 +216,7 @@ def reserve_book():
                 else:
                     # Check if the book is available
                     query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
-                    cursor.execute(query, (book_id))
+                    cursor.execute(query, (book_id,))
                     book = cursor.fetchone()
 
                     if book:
