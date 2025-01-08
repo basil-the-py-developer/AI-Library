@@ -208,22 +208,26 @@ def reserve_book():
             if user:
                 # Check the count of books already reserved by the user
                 query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
-                cursor.execute(query, (card_id,))
+                cursor.execute(query, (card_id))
                 reserved_count = cursor.fetchone()[0]
 
                 if reserved_count >= 2:
                     message = "Reservation not confirmed. You have already reserved 2 books, which is the maximum limit."
                 else:
                     # Check if the book is available
-                    query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s;"""
-                    cursor.execute(query, (book_id,))
+                    query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
+                    cursor.execute(query, (book_id))
                     book = cursor.fetchone()
 
                     if book:
                         bk_name, bk_status = book
                         if bk_status == "Available":
                             # Update book status to "Reserved" and set the user CARD_ID
-                            query = """UPDATE "library" SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = 13 WHERE "BK_ID" = 'BK-00013' ;"""
+                            query = '''
+                                    UPDATE "library" 
+                                    SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = 13 
+                                    WHERE "BK_ID" = 'BK-00018';
+                                    '''
                             #cursor.execute(query, (f"{card_id}", f"'{book_id}'"))
                             cursor.execute(query)
 
