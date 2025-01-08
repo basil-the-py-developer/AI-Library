@@ -225,11 +225,11 @@ def reserve_book():
                             # Update book status to "Reserved" and set the user CARD_ID
                             query = '''
                                     UPDATE "library" 
-                                    SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = 13 
-                                    WHERE "BK_ID" = 'BK-00018';
+                                    SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s 
+                                    WHERE "BK_ID" = %s ;
                                     '''
-                            #cursor.execute(query, (f"{card_id}", f"'{book_id}'"))
-                            cursor.execute(query)
+                            cursor.execute(query, (card_id, f"'{book_id}'"))
+                            #cursor.execute(query)
                             db_connection.commit()
                             message = f"The book '{bk_name}' has been reserved successfully!"
                         else:
