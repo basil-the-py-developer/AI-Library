@@ -231,7 +231,7 @@ def reserve_book():
                             cursor.execute(query, (int(card_id), book_id)) 
                             #cursor.execute(query)
                             db_connection.commit()
-                            message = f"The book '{bk_name}' has been {book_id} reserved '{book_id}' successfully!"
+                            message = f"The book '{bk_name}' has been reserved successfully!"
                         else:
                             message = f"Sorry, the book '{bk_name}' is currently not available."
                     else:
