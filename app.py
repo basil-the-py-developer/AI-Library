@@ -117,7 +117,7 @@ def result():
         query = """
         SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME"
         FROM library
-        WHERE similarity("BOOK_NAME", %s) > 0.3
+        WHERE similarity("BK_NAME", %s) > 0.3
            OR "BOOK_NAME" ILIKE %s;
         """
         cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
