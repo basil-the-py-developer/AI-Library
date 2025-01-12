@@ -79,12 +79,12 @@ def result():
 
         if books:
             for book in books:
-                bk_name, bk_id, bk_status, due_date = book
+                bk_name, bk_id, bk_status, author_name = book
                 results.append({
                     "bk_name": bk_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
-                    "due_date": due_date
+                    "author_name": author_name
                 })
             
         else:
@@ -129,10 +129,9 @@ def result():
                 bk_name, bk_id, bk_status, author_name = book
                 output = {
                     "bk_name": bk_name,
-                    "author_name": author_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
-                   
+                    "author_name": author_name,
                 }
                 results.append(output)
 
