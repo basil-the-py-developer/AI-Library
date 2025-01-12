@@ -68,7 +68,12 @@ def result():
     links = []
 
     if search_type == "Search by Author":
-        query = """SELECT  "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME" FROM library WHERE levenshtein_less_equal("AUTHOR_NAME", %s, 2) <= 2 OR "AUTHOR_NAME" ILIKE %s ;"""
+        query = """
+        SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME"
+        FROM library
+        WHERE similarity("AUTHOR_NAME", %s) > 0.3
+           OR "AUTHOR_NAME" ILIKE %s;
+        """
         cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
         books = cursor.fetchall()
 
@@ -109,7 +114,12 @@ def result():
 
 
     elif search_type == "Search by Book":
-        query = """SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME" FROM library WHERE levenshtein_less_equal("BK_NAME", %s, 2) <= 2 OR "BK_NAME" ILIKE %s """
+        query = """
+        SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME"
+        FROM library
+        WHERE similarity("BOOK_NAME", %s) > 0.3
+           OR "BOOK_NAME" ILIKE %s;
+        """
         cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
         books = cursor.fetchall()
 
