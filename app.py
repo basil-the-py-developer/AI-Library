@@ -141,8 +141,9 @@ def result():
         # Generate AI response about the book and the author regardless of book presence
         response = model.generate_content(
             f"Get a summary of the book '{search_input}' and information about the author. "
-             "nothing other than the summary of the book and information about the author should be included in the output."
-             "present the summary in a beautiful and readable format."
+             "nothing other than the summary of the book and information about the author should be included in the output. "
+             "present the summary in a structured and beautiful way. "
+             "Also double check if the author name is correct. Do not make a mistake. "
              "If the book name is invalid or not found include 'No summary found' in your response."
         )
         
