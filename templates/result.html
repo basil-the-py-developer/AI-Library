@@ -18,11 +18,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-            z-index: 0;
-            
+            background: url('/static/back.jpg') no-repeat center center fixed;
+            background-size: cover;
             color: #E0DFCA;
             font-family: 'Roboto', sans-serif;
             display: flex;
@@ -31,30 +28,6 @@
             height: 100vh;
             margin: 0;
             position: relative;
-        }
-
-        .gradient-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-            z-index: 0;
-        }
-
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
         }
 
         .container {
@@ -99,20 +72,27 @@
             border-radius: 10px;
         }
 
-        .btn-primary {
-            background-color: transparent;
-            color: #E0DFCA;
-            border: 2px solid #E0DFCA;
-            border-radius: 25px;
-            padding: 12px 25px;
-            font-size: 18px;
-            transition: background-color 0.3s, color 0.3s;
-        }
+       
+    .btn-primary {
+        margin-top: 10px;
+        align-self: center;
+        color: #E0DFCA;
+        text-decoration: none;
+        font-size: 16px;
+        padding: 10px 17px;
+        background-color: rgba(0, 0, 139, 0.6);
+        border-radius: 6px;
+        border: none;
+        transition: background-color 0.3s, transform 0.3s;
+    }
 
-        .btn-primary:hover {
-            background-color: #E0DFCA;
-            color: #333333;
-        }
+    .btn-primary:hover {
+        background-color: rgba(0, 0, 139, 0.8);
+        transform: scale(1.05);
+        color: #E0DFCA;
+    }
+
+
 
         pre {
             color: #E0DFCA;
@@ -126,23 +106,6 @@
             max-height: 400px;
             overflow-y: auto;
             font-family: Georgia, 'Times New Roman', Times, serif 
-        }
-        pre::-webkit-scrollbar {
-        width: 8px; /* Width of the scrollbar */
-        }
-
-        pre::-webkit-scrollbar-thumb {
-            background: #a068d5; /* Color of the scrollbar thumb */
-            border-radius: 10px; /* Rounded corners */
-        }
-
-        pre::-webkit-scrollbar-thumb:hover {
-            background: #6532a8; /* Darker color on hover */
-        }
-
-        pre::-webkit-scrollbar-track {
-            background: whitesmoke; /* Track background color */
-            border-radius: 10px; /* Rounded corners for the track */
         }
 
         .list-group-item {
@@ -178,20 +141,28 @@
         }
 
         .navbar a {
-        color: #E0DFCA;
-        text-decoration: none;
-        font-size: 16px; /* Reduced font size */
-        padding: 8px 16px; /* Reduced padding */
-        background-color: rgba(0, 0, 139, 0.6); /* Dark blue transparent background */
-        border-radius: 6px; /* Slightly rounded corners */
-        transition: background-color 0.3s, transform 0.3s;
+            margin-top: 10px;
+            align-self: center;
+            color: #E0DFCA;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 15px;
+            background-color: rgba(0, 0, 139, 0.6);
+            border-radius: 6px;
+            border: none;
+            transition: background-color 0.3s, transform 0.3s;
         }
 
         .navbar a:hover {
-            background-color: rgba(0, 0, 139, 0.8); /* Darker on hover */
-            transform: scale(1.05); /* Slight scaling effect on hover */
+            background-color: rgba(0, 0, 139, 0.8);
+            transform: scale(1.05);
+            color: #E0DFCA;
+        }
+        .navbar-nav a {
+            margin-right: 10px; /* Add a small gap between the buttons */
         }
 
+    
 
         footer {
             height: 20px; 
@@ -201,11 +172,10 @@
     </style>
 </head>
 <body>
-    <div class="gradient-effect"></div> 
-    <div class="gradient-effect"></div>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="navbar-nav">
-            <a class="nav-item-nav-link" href="/reserve">Reserve a Book</a>
+            <a href="/" class="btn btn-primary">Back to Search</a>
+            <a href="/reserve" class="btn btn-primary">Reserve a Book</a>
         </div>
     </nav>
     <div class="container mt-5">
@@ -246,7 +216,6 @@
                 {% endif %}
             {% endif %}
         </div>
-        <a href="{{ url_for('index') }}" class="btn btn-primary mt-3">Back to Search</a>
     </div>
     <footer></footer> 
 </body>

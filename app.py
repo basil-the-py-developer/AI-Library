@@ -24,30 +24,11 @@ def clean_response(response_text):
     cleaned_text = response_text.replace("*", "").replace("#", "").strip()
     return cleaned_text
 
-#def get_suggested_input(input_text):
-    # Use AI to get a suggestion for corrected input
-#    response = model.generate_content(f"provide a correctly spelled version of this text: '{input_text}'."
-    #                                   "if the text consists of random letters that is not meaningful in any language "
-   #                                    "keep the text as it is, else give the corrected spelling version. "
-  #                                     "Do not output anything other than the corrected version of the text."
- #   )
-#
-#    return clean_response(response.text)
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         search_type = request.form.get('search_type')
         search_input = request.form.get('search_input').strip()
-        
-        # Get AI suggestion for corrected input
-        #modified_input = get_suggested_input(search_input)
-
-        #if modified_input != search_input:
-            # Inform the user if the AI suggests a correction
-         #   return redirect(url_for('result', search_type=search_type, search_input=modified_input, original_input=search_input))
-        #else:
-            # Proceed with the search if no modification
         return redirect(url_for('result', search_type=search_type, search_input=search_input))
     return render_template('index.html')
 
@@ -180,9 +161,18 @@ def result():
     db_connection.close()
 
 
+@app.route('/contribute', methods=['GET', 'POST'])
+
+def contribution():
+    if request.method == 'POST':
+        book_name = request.form.get('book_name').strip()
+        author_name = request.form.get('author_name').strip()
+        card = request.form.get('card_id').strip()
+    return render_template('contribute.html')
+
+
 
 @app.route('/reserve', methods=['GET', 'POST'])
-
 
 def reserve_book():
     # Initialize the db connection and cursor outside of the method block
