@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribute a Book</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script defer src="https://vercel.com/analytics/script.js"></script>
+    <style>
+        body {
+            background: url('/static/back.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #E0DFCA;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: rgba(18, 18, 18, 0.8);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            margin: 10px auto;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+        }
+
+        .navbar {
+            background-color: transparent;
+            padding: 10px 20px;
+        }
+
+        .navbar a {
+            color: #ddcccc;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 8px 16px;
+            background-color: rgba(0, 0, 139, 0.6);
+            border-radius: 6px;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 4px; /* Moves the navbar button 2px down */
+        }
+
+        .navbar a:hover {
+            background-color: rgba(0, 0, 139, 0.8);
+            transform: scale(1.05);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .form-group input {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="navbar-nav">
+            <a class="nav-item-nav-link" href="/">Back to Library Search</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center">Contribute a Book</h1>
+        <form method="POST" class="mt-1">
+            <div class="form-group">
+                <label for="book_name">Book Name:</label>
+                <input type="text" class="form-control" id="book_name" name="book_name" required>
+            </div>
+            <div class="form-group">
+                <label for="author_name">Author Name:</label>
+                <input type="text" class="form-control" id="author_name" name="author_name" required>
+            </div>
+            <div class="form-group">
+                <label for="card_id">Contributor's Card ID:</label>
+                <input type="text" class="form-control" id="card_id" name="card_id" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Contribution</button>
+        </form>
+    </div>
+
+    <div class="container text-center py-3 mt-4">
+        <p>Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
+        <p>
+            <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank">Portfolio</a> |
+            <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank">Connect on LinkedIn</a>
+        </p>
+        <p>© 2024 Swastha AI. All Rights Reserved.</p>
+    </div>
+</body>
+</html>

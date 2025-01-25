@@ -9,40 +9,16 @@
     <script defer src="https://vercel.com/analytics/script.js"></script>
     <style>
         body {
-            background: linear-gradient(to right, violet, pink);
+            background-image: url('/static/back.jpg');
+            background-size: cover;
+            background-position: center;
             color: #E0DFCA;
             font-family: 'Roboto', sans-serif;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .gradient-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-            z-index: 0;
-        }
-
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
         }
 
         .container {
@@ -64,26 +40,31 @@
             color: #ffffff;
         }
 
-        .footer {
-            background-color: #282828;
-            color: #E0DFCA;
-            font-size: 0.9rem;
-            border-top: 1px solid #444;
-            width: 100%;
+        .btn-custom {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: rgba(0, 0, 139, 0.6);
+            border-radius: 6px;
+            color: #ddcccc;  /* Change text color to white for better contrast */
             text-align: center;
-        }
-
-        .footer a {
-            color: #FFD700;
+            font-size: 16px;
             text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .footer a:hover {
-            text-decoration: underline;
+        .btn-custom:hover {
+            background-color: rgba(0, 0, 139, 0.8);
+            transform: scale(1.05);
+            color: #c4acac;  /* Ensure text stays white on hover */
+            text-decoration: none;  /* Remove underline on hover */
         }
 
-        .footer p {
-            margin: 5px 0;
+
+        .btn-custom:focus {
+            outline: none;
         }
 
         .navbar {
@@ -94,31 +75,44 @@
         .navbar a {
             color: #E0DFCA;
             text-decoration: none;
-            font-size: 16px; /* Reduced font size */
-            padding: 8px 16px; /* Adjusted padding */
-            background-color: rgba(0, 0, 139, 0.6); /* Dark blue transparent background */
-            border-radius: 6px; /* Slightly rounded corners */
+            font-size: 16px;
+            padding: 8px 16px;
+            background-color: rgba(0, 0, 139, 0.6);
+            border-radius: 6px;
             transition: background-color 0.3s, transform 0.3s;
         }
 
         .navbar a:hover {
-            background-color: rgba(0, 0, 139, 0.8); /* Darker blue on hover */
-            transform: scale(1.05); /* Slight scaling effect */
+            background-color: rgba(0, 0, 139, 0.8);
+            transform: scale(1.05);
         }
 
         html {
             scroll-behavior: smooth;
         }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            position: absolute;
+            left: 20px;
+            top: 15px;
+        }
+
+        .text-center.py-3 {
+            text-align: center;
+            padding: 1rem 0;
+        }
     </style>
 </head>
 <body>
-    <div class="gradient-effect"></div>
-
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="navbar-nav">
-            <a class="nav-item-nav-link" href="/reserve">Reserve a Book</a>
-        </div>
     </nav>
+
+    <div class="nav-buttons">
+        <a href="/contribute" class="btn-custom">Contribute a Book</a>
+        <a href="/reserve" class="btn-custom">Reserve a Book</a>
+    </div>
 
     <div class="container mt-5">
         <h1 class="text-center">AI Integrated Student Book Guide</h1>
@@ -138,15 +132,14 @@
         </form>
     </div>
 
-    <footer class="footer">
-        <div class="container text-center py-3">
-            <p class="mb-0">Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
-            <p class="mb-0">
-                <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank" class="footer-link">Portfolio</a> |
-                <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank" class="footer-link">Connect on LinkedIn</a>
-            </p>
-            <p class="mb-0">© 2024 Swastha AI. All Rights Reserved.</p>
-        </div>
-    </footer>
+    <div class="container text-center py-3 mt-5">
+        <p>Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
+        <p>
+            <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank">Portfolio</a> |
+            <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank">Connect on LinkedIn</a>
+        </p>
+        <p>© 2024 Swastha AI. All Rights Reserved.</p>
+    </div>
+    
 </body>
 </html>
