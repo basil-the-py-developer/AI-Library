@@ -2,4 +2,4 @@
 google-generativeai
 googlesearch-python==1.2.5
 psycopg2-binary==2.9.10
-wikipedia==1.4.0
+

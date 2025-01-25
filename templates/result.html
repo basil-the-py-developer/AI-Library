@@ -72,27 +72,24 @@
             border-radius: 10px;
         }
 
-       
-    .btn-primary {
-        margin-top: 10px;
-        align-self: center;
-        color: #E0DFCA;
-        text-decoration: none;
-        font-size: 16px;
-        padding: 10px 17px;
-        background-color: rgba(0, 0, 139, 0.6);
-        border-radius: 6px;
-        border: none;
-        transition: background-color 0.3s, transform 0.3s;
-    }
+        .btn-primary {
+            margin-top: 10px;
+            align-self: center;
+            color: #E0DFCA;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 17px;
+            background-color: rgba(0, 0, 139, 0.6);
+            border-radius: 6px;
+            border: none;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-    .btn-primary:hover {
-        background-color: rgba(0, 0, 139, 0.8);
-        transform: scale(1.05);
-        color: #E0DFCA;
-    }
-
-
+        .btn-primary:hover {
+            background-color: rgba(0, 0, 139, 0.8);
+            transform: scale(1.05);
+            color: #E0DFCA;
+        }
 
         pre {
             color: #E0DFCA;
@@ -105,7 +102,7 @@
             max-width: 100%;
             max-height: 400px;
             overflow-y: auto;
-            font-family: Georgia, 'Times New Roman', Times, serif 
+            font-family: Georgia, 'Times New Roman', Times, serif;
         }
 
         .list-group-item {
@@ -140,29 +137,10 @@
             height: 80px; 
         }
 
-        .navbar a {
-            margin-top: 10px;
-            align-self: center;
-            color: #E0DFCA;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 8px 15px;
-            background-color: rgba(0, 0, 139, 0.6);
-            border-radius: 6px;
-            border: none;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .navbar a:hover {
-            background-color: rgba(0, 0, 139, 0.8);
-            transform: scale(1.05);
-            color: #E0DFCA;
-        }
         .navbar-nav a {
-            margin-right: 10px; /* Add a small gap between the buttons */
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
-
-    
 
         footer {
             height: 20px; 
@@ -173,11 +151,15 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="navbar-nav">
-            <a href="/" class="btn btn-primary">Back to Search</a>
-            <a href="/reserve" class="btn btn-primary">Reserve a Book</a>
+        <div class="navbar-nav w-100">
+            <div class="d-flex justify-content-between w-100">
+                <a href="/" class="btn btn-primary">Back to Search</a>
+                <a href="/reserve" class="btn btn-primary">Reserve a Book</a>
+            </div>
         </div>
     </nav>
+    
+    
     <div class="container mt-5">
         <div class="mt-4 text-black">
             {% if error %}

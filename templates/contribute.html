@@ -51,6 +51,7 @@
             border-radius: 6px;
             transition: background-color 0.3s, transform 0.3s;
             margin-top: 4px; /* Moves the navbar button 2px down */
+            
         }
 
         .navbar a:hover {
@@ -65,12 +66,20 @@
         .form-group input {
             margin-bottom: 15px;
         }
+        @media (max-width: 576px) {
+            .navbar a {
+                padding: 10px 16px;
+                margin-top: 10px; /* Adds space above the button */
+                margin-bottom: 20px; /* Adds space below the button */
+            }
+        }
+
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="navbar-nav">
-            <a class="nav-item-nav-link" href="/">Back to Library Search</a>
+            <a class="nav-item-nav-link" href="/">Back to Search</a>
         </div>
     </nav>
 
