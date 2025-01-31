@@ -123,8 +123,8 @@ def result():
         response = model.generate_content(
             f"Get a summary of the Novel/book '{search_input}' and information about the author. "
              "nothing other than the summary of the Novel/book and information about the author should be included in the output. "
-             "present the summary in a structured and beautiful way. "
              "Also triple check if the author name is correct. Do not make a mistake. "
+             "Present the Summary in a clear and enagaing way. There should be a heading for the summary on the top. " 
              "If the book name is invalid or not found include 'No summary found' in your response."
         )
         
@@ -134,7 +134,7 @@ def result():
         if "No summary found" in cleaned_response:
             bk_links = []
             # Search online for additional details when no summary is found
-            bk_links = list(search(f"Get summary of the book '{search_input_upper}'", num_results=5))
+            bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
         
             # Update response to include a note about related links
             cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
@@ -163,14 +163,52 @@ def result():
 
 @app.route('/contribute', methods=['GET', 'POST'])
 
+
 def contribution():
     if request.method == 'POST':
         book_name = request.form.get('book_name').strip()
         author_name = request.form.get('author_name').strip()
-        card = request.form.get('card_id').strip()
+        card_id = request.form.get('card_id').strip()
+
+        db_connection = connect_to_library_db()
+        cursor = db_connection.cursor()
+
+        try:
+            # Check if the card ID exists in the 'user' table
+            query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s;"""
+            cursor.execute(query, (card_id,))
+            user = cursor.fetchone()
+
+            if not user:
+                message = "Error: Your card ID is not present in the database."
+            else:
+                # Insert the book details into the 'contributed' table
+                insert_query = """
+                INSERT INTO "contributed" ("book", "author", "contributed_by", "DATE")
+                VALUES (%s, %s, %s, CURRENT_DATE);
+                """
+                cursor.execute(insert_query, (book_name, author_name, card_id))
+                db_connection.commit()
+
+                # Success message
+                message = (
+                    f"Thank you for contributing '{book_name}' by {author_name}! "
+                    "Your contribution data has been recorded. Once the book is received by the librarian, it will be added to the library's collection. "
+                    "You will then earn 2 additional credits on top of your default credit of 2 for each book you contribute. "
+                    "These credits will allow you to reserve an equal number of books per week. Please note that this cycle resets every Sunday."
+                )
+
+        except Exception as e:
+            app.logger.error(f"Error during contribution: {e}")
+            message = "An error occurred while processing your contribution."
+
+        finally:
+            cursor.close()
+            db_connection.close()
+
+        return render_template('contribution_result.html', message=message)
+
     return render_template('contribute.html')
-
-
 
 @app.route('/reserve', methods=['GET', 'POST'])
 
