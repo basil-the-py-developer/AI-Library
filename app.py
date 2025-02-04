@@ -121,11 +121,11 @@ def result():
 
         # Generate AI response about the book and the author regardless of book presence
         response = model.generate_content(
-            f"Get a summary of the Novel/book '{search_input}' and information about the author. "
-             "nothing other than the summary of the Novel/book and information about the author should be included in the output. "
-             "Also triple check if the author name is correct. Do not make a mistake. "
-             "Present the Summary in a clear and enagaing way. There should be a heading for the summary on the top. " 
-             "If the book name is invalid or not found include 'No summary found' in your response."
+            f"Get a summary of the Novel '{search_input}' and information about the author. "
+             # "nothing other than the summary of the Novel/book and information about the author should be included in the output. "
+             # "Also triple check if the author name is correct. Do not make a mistake. "
+             # "Present the Summary in a clear and enagaing way. There should be a heading for the summary on the top. " 
+             # "If the book name is invalid or not found include 'No summary found' in your response."
         )
         
         cleaned_response = clean_response(response.text)
