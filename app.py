@@ -7,7 +7,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import redis
 
-
 app = Flask(__name__)
 database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
@@ -25,12 +24,45 @@ redis_client = redis.Redis(
     password=f"{redis_pass}",
 )
 
+MAX_REQUESTS = 5 
+BLOCK_TIME = 360
+
+
+def get_ip():
+    """Retrieve client IP address"""
+    return request.headers.get("X-Forwarded-For", request.remote_addr)
+
 # Set up rate limiter
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["5 per minute"],  # Limit each IP to 5 requests per minute
+    default_limits=["10 per minute"],  # Limit each IP to 5 requests per minute
 )
+
+@app.before_request
+def block_bad_ips():
+    """Block users who exceeded rate limits"""
+    ip = get_ip()
+    
+    # Check if IP is blocked
+    if redis_client.exists(f"blocked:{ip}"):
+        abort(403, "Your IP has been blocked due to excessive requests.")
+
+    # Increment request count
+    key = f"requests:{ip}"
+    requests = redis_client.incr(key)
+
+    if requests == 1:
+        redis_client.expire(key, 60)  # Reset count every 60 seconds
+
+    if requests > MAX_REQUESTS:
+        redis_client.setex(f"blocked:{ip}", BLOCK_TIME, "1")  # Block IP for 1 hour
+        abort(403, "Your IP has been blocked due to excessive requests.")
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return jsonify(error=str(e)), 403
 
 
 def connect_to_library_db():
@@ -47,7 +79,7 @@ def clean_response(response_text):
     return cleaned_text
 
 @app.route('/', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")  # Apply rate limiting
+@limiter.limit("10 per minute")  # Apply rate limiting
 def index():
 
     ip_address = request.remote_addr  # Get client IP
