@@ -3,13 +3,35 @@ import google.generativeai as genai
 from googlesearch import search
 import psycopg2
 import os
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import redis
+
 
 app = Flask(__name__)
 database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
+redis_pass = os.getenv("REDIS_PASS")
 
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-exp")
+
+# Initialize Redis for IP tracking
+redis_client = redis.Redis(
+    host='redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com',
+    port=11307,
+    decode_responses=True,
+    username="default",
+    password=f"{redis_pass}",
+)
+
+# Set up rate limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["5 per minute"],  # Limit each IP to 5 requests per minute
+)
+
 
 def connect_to_library_db():
     return psycopg2.connect(
@@ -25,7 +47,16 @@ def clean_response(response_text):
     return cleaned_text
 
 @app.route('/', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Apply rate limiting
 def index():
+
+    ip_address = request.remote_addr  # Get client IP
+
+    # Track IP visits in Redis
+    redis_key = f"ip:{ip_address}:visits"
+    redis_client.incr(redis_key)  # Increment visit count
+    redis_client.expire(redis_key, 86400)  # Set expiry to 1 day
+
     if request.method == 'POST':
         search_type = request.form.get('search_type')
         search_input = request.form.get('search_input').strip()
