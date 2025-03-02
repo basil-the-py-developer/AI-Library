@@ -6,6 +6,9 @@ import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import redis
+import requests
+from datetime import datetime
+
 
 app = Flask(__name__)
 database_password = os.getenv('DATABASE_PASSWORD')
@@ -24,54 +27,37 @@ redis_client = redis.Redis(
     password=f"{redis_pass}",
 )
 
-MAX_REQUESTS = 5 
-BLOCK_TIME = 360
-
-
-def get_ip():
-    """Retrieve client IP address"""
-    return request.headers.get("X-Forwarded-For", request.remote_addr)
-
 # Set up rate limiter
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["10 per minute"],  # Limit each IP to 5 requests per minute
+    storage_uri=f"redis://default:{redis_pass}@redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com:11307",
+    default_limits=["10 per minute"],  
 )
 
-@app.before_request
-def block_bad_ips():
-    """Block users who exceeded rate limits"""
-    ip = get_ip()
-    
-    # Check if IP is blocked
-    if redis_client.exists(f"blocked:{ip}"):
-        abort(403, "Your IP has been blocked due to excessive requests.")
-
-    # Increment request count
-    key = f"requests:{ip}"
-    requests = redis_client.incr(key)
-
-    if requests == 1:
-        redis_client.expire(key, 60)  # Reset count every 60 seconds
-
-    if requests > MAX_REQUESTS:
-        redis_client.setex(f"blocked:{ip}", BLOCK_TIME, "1")  # Block IP for 1 hour
-        abort(403, "Your IP has been blocked due to excessive requests.")
-
-
-@app.errorhandler(403)
-def forbidden(e):
-    return jsonify(error=str(e)), 403
-
+def get_geolocation(ip):
+    """Fetches approximate geolocation using ipinfo.io"""
+    try:
+        response = requests.get(f"http://ipinfo.io/{ip}/json", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "city": data.get("city", "Unknown"),
+                "region": data.get("region", "Unknown"),
+                "country": data.get("country", "Unknown"),
+                "loc": data.get("loc", "Unknown")  # Latitude, Longitude
+            }
+    except Exception as e:
+        print(f"Geolocation error: {e}")
+    return None
 
 def connect_to_library_db():
     return psycopg2.connect(
-            host="aws-0-ap-southeast-1.pooler.supabase.com",  # E.g., localhost or an IP address
-            database="postgres",                             # Your database name
+            host="aws-0-ap-southeast-1.pooler.supabase.com",  
+            database="postgres",                            
             user="postgres.fxtisfulbcghgrljxblf", 
-            port="6543",                                     # Your port
-            password=f"{database_password}"                             # Your password
+            port="6543",                                    
+            password=f"{database_password}"                  
         )
 
 def clean_response(response_text):
@@ -82,12 +68,21 @@ def clean_response(response_text):
 @limiter.limit("10 per minute")  # Apply rate limiting
 def index():
 
-    ip_address = request.remote_addr  # Get client IP
-
-    # Track IP visits in Redis
-    redis_key = f"ip:{ip_address}:visits"
-    redis_client.incr(redis_key)  # Increment visit count
-    redis_client.expire(redis_key, 86400)  # Set expiry to 1 day
+    ip_address = request.remote_addr  
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    now = datetime.utcnow().isoformat()
+    redis_key = f"ip:{ip_address}"
+    redis_client.hincrby(redis_key, "visits", 1)
+    redis_client.hsetnx(redis_key, "first_visit", now)
+    redis_client.hset(redis_key, "last_visit", now)
+    redis_client.hset(redis_key, "user_agent", user_agent)
+    if not redis_client.hexists(redis_key, "city"):
+        geo_data = get_geolocation(ip_address)
+        if geo_data:
+            redis_client.hset(redis_key, "city", geo_data["city"])
+            redis_client.hset(redis_key, "region", geo_data["region"])
+            redis_client.hset(redis_key, "country", geo_data["country"])
+            redis_client.hset(redis_key, "loc", geo_data["loc"])  
 
     if request.method == 'POST':
         search_type = request.form.get('search_type')
@@ -104,7 +99,7 @@ def result():
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
 
-    # Prepare the input for searching by converting it to uppercase
+    
     search_input_upper = search_input.upper()
 
     results = []
@@ -130,14 +125,14 @@ def result():
                     "bk_status": bk_status,
                     "author_name": author_name
                 })
-            
+
         else:
             pass
         # Handle the case where no books are found
         response = model.generate_content(
             f"Get details about the author {search_input} and books by the author."
             "If the author name is invalid or not found include 'No Information found about the author' in your response."
-    
+
         )
         cleaned_response = clean_response(response.text)
 
@@ -190,15 +185,15 @@ def result():
              # "Present the Summary in a clear and enagaing way. There should be a heading for the summary on the top. " 
              # "If the book name is invalid or not found include 'No summary found' in your response."
         )
-        
+
         cleaned_response = clean_response(response.text)
-        
+
 
         if "No summary found" in cleaned_response:
             bk_links = []
             # Search online for additional details when no summary is found
             bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
-        
+
             # Update response to include a note about related links
             cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
 
@@ -285,10 +280,10 @@ def reserve_book():
             query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
             cursor.execute(query)
             books = cursor.fetchall()
-            
+
             # Return the list of available books to the user
             return render_template('reserve.html', books=books)
-        
+
         except Exception as e:
             # Log the error and return a message to the user
             app.logger.error(f"Error during database fetch: {e}")
@@ -342,7 +337,7 @@ def reserve_book():
                     "Reservation not confirmed. You are not an existing member of BEN Library. "
                     "To become a member, borrow your first book directly from the library."
                 )
-        
+
         except Exception as e:
             # Log the error during POST and return a message to the user
             app.logger.error(f"Error during reservation process: {e}")
@@ -357,4 +352,3 @@ def reserve_book():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
