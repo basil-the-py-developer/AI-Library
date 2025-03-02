@@ -31,18 +31,15 @@ redis_client = redis.Redis(
 limiter = Limiter(
     get_remote_address,
     app=app,
-    storage_uri=f"redis://default:{redis_pass}@redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com:11307",
-    default_limits=["10 per minute"],  
+    default_limits=["10 per minute"],   
 )
 
 def get_geolocation(ip):
     try:
-        response = requests.get(f"https://ipinfo.io/{ip}/json")
+        response = requests.get(f"https://ipinfo.io/{ip}/json", timeout=5)
         data = response.json()
-        country = data.get("country", "Unknown")
-        region = data.get("region", "Unknown") 
-        return country, region
-    except Exception as e:
+        return data.get("country", "Unknown"), data.get("region", "Unknown")
+    except Exception:
         return "Unknown", "Unknown"
 
 def connect_to_library_db():
@@ -65,13 +62,15 @@ def index():
     user_agent = request.headers.get("User-Agent", "Unknown")
     country, region = get_geolocation(ip_address)
     timestamp = datetime.utcnow().isoformat()
-
-    # store data in redis
     redis_key = f"ip:{ip_address}:data"
+    existing_data = redis_client.hgetall(redis_key)
+    first_visit = existing_data.get("first_visit", timestamp)
+    visits = int(existing_data.get("visits", 0)) + 1
     redis_client.hset(redis_key, mapping={
-        "visits": redis_client.incr(f"ip:{ip_address}:visits"),
+        "first_visit": first_visit,
+        "last_visit": timestamp,
+        "visits": visits,
         "user_agent": user_agent,
-        "timestamp": timestamp,
         "country": country,
         "region": region,
     })
