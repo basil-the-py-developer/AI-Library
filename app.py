@@ -3,21 +3,52 @@ import google.generativeai as genai
 from googlesearch import search
 import psycopg2
 import os
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import redis
+import requests
+from datetime import datetime
+
 
 app = Flask(__name__)
 database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
+redis_pass = os.getenv("REDIS_PASS")
 
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-exp")
 
+# Initialize Redis for IP tracking
+redis_client = redis.Redis(
+    host='redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com',
+    port=11307,
+    decode_responses=True,
+    username="default",
+    password=f"{redis_pass}",
+)
+
+# Set up rate limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["10 per minute"],   
+)
+
+def get_geolocation(ip):
+    try:
+        response = requests.get(f"https://ipinfo.io/{ip}/json", timeout=5)
+        data = response.json()
+        return data.get("country", "Unknown"), data.get("region", "Unknown")
+    except Exception:
+        return "Unknown", "Unknown"
+
 def connect_to_library_db():
     return psycopg2.connect(
-            host="aws-0-ap-southeast-1.pooler.supabase.com",  # E.g., localhost or an IP address
-            database="postgres",                             # Your database name
+            host="aws-0-ap-southeast-1.pooler.supabase.com",  
+            database="postgres",                            
             user="postgres.fxtisfulbcghgrljxblf", 
-            port="6543",                                     # Your port
-            password=f"{database_password}"                             # Your password
+            port="6543",                                    
+            password=f"{database_password}"                  
         )
 
 def clean_response(response_text):
@@ -25,7 +56,26 @@ def clean_response(response_text):
     return cleaned_text
 
 @app.route('/', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")  # Apply rate limiting
 def index():
+    ip_address = request.remote_addr
+    user_agent = request.headers.get("User-Agent", "Unknown")
+    country, region = get_geolocation(ip_address)
+    timestamp = datetime.utcnow().isoformat()
+    redis_key = f"ip:{ip_address}:data"
+    existing_data = redis_client.hgetall(redis_key)
+    first_visit = existing_data.get("first_visit", timestamp)
+    visits = int(existing_data.get("visits", 0)) + 1
+    redis_client.hset(redis_key, mapping={
+        "first_visit": first_visit,
+        "last_visit": timestamp,
+        "visits": visits,
+        "user_agent": user_agent,
+        "country": country,
+        "region": region,
+    })
+    redis_client.persist(redis_key)
+
     if request.method == 'POST':
         search_type = request.form.get('search_type')
         search_input = request.form.get('search_input').strip()
@@ -41,7 +91,7 @@ def result():
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
 
-    # Prepare the input for searching by converting it to uppercase
+    
     search_input_upper = search_input.upper()
 
     results = []
@@ -67,14 +117,14 @@ def result():
                     "bk_status": bk_status,
                     "author_name": author_name
                 })
-            
+
         else:
             pass
         # Handle the case where no books are found
         response = model.generate_content(
             f"Get details about the author {search_input} and books by the author."
             "If the author name is invalid or not found include 'No Information found about the author' in your response."
-    
+
         )
         cleaned_response = clean_response(response.text)
 
@@ -127,15 +177,15 @@ def result():
              # "Present the Summary in a clear and enagaing way. There should be a heading for the summary on the top. " 
              # "If the book name is invalid or not found include 'No summary found' in your response."
         )
-        
+
         cleaned_response = clean_response(response.text)
-        
+
 
         if "No summary found" in cleaned_response:
             bk_links = []
             # Search online for additional details when no summary is found
             bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
-        
+
             # Update response to include a note about related links
             cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
 
@@ -222,10 +272,10 @@ def reserve_book():
             query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
             cursor.execute(query)
             books = cursor.fetchall()
-            
+
             # Return the list of available books to the user
             return render_template('reserve.html', books=books)
-        
+
         except Exception as e:
             # Log the error and return a message to the user
             app.logger.error(f"Error during database fetch: {e}")
@@ -279,7 +329,7 @@ def reserve_book():
                     "Reservation not confirmed. You are not an existing member of BEN Library. "
                     "To become a member, borrow your first book directly from the library."
                 )
-        
+
         except Exception as e:
             # Log the error during POST and return a message to the user
             app.logger.error(f"Error during reservation process: {e}")
@@ -294,4 +344,3 @@ def reserve_book():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
