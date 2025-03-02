@@ -36,20 +36,14 @@ limiter = Limiter(
 )
 
 def get_geolocation(ip):
-    """Fetches approximate geolocation using ipinfo.io"""
     try:
-        response = requests.get(f"http://ipinfo.io/{ip}/json", timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            return {
-                "city": data.get("city", "Unknown"),
-                "region": data.get("region", "Unknown"),
-                "country": data.get("country", "Unknown"),
-                "loc": data.get("loc", "Unknown")  # Latitude, Longitude
-            }
+        response = requests.get(f"https://ipinfo.io/{ip}/json")
+        data = response.json()
+        country = data.get("country", "Unknown")
+        region = data.get("region", "Unknown") 
+        return country, region
     except Exception as e:
-        print(f"Geolocation error: {e}")
-    return None
+        return "Unknown", "Unknown"
 
 def connect_to_library_db():
     return psycopg2.connect(
@@ -67,22 +61,21 @@ def clean_response(response_text):
 @app.route('/', methods=['GET', 'POST'])
 @limiter.limit("10 per minute")  # Apply rate limiting
 def index():
+    ip_address = request.remote_addr
+    user_agent = request.headers.get("User-Agent", "Unknown")
+    country, region = get_geolocation(ip_address)
+    timestamp = datetime.utcnow().isoformat()
 
-    ip_address = request.remote_addr  
-    user_agent = request.headers.get('User-Agent', 'Unknown')
-    now = datetime.utcnow().isoformat()
-    redis_key = f"ip:{ip_address}"
-    redis_client.hincrby(redis_key, "visits", 1)
-    redis_client.hsetnx(redis_key, "first_visit", now)
-    redis_client.hset(redis_key, "last_visit", now)
-    redis_client.hset(redis_key, "user_agent", user_agent)
-    if not redis_client.hexists(redis_key, "city"):
-        geo_data = get_geolocation(ip_address)
-        if geo_data:
-            redis_client.hset(redis_key, "city", geo_data["city"])
-            redis_client.hset(redis_key, "region", geo_data["region"])
-            redis_client.hset(redis_key, "country", geo_data["country"])
-            redis_client.hset(redis_key, "loc", geo_data["loc"])  
+    # store data in redis
+    redis_key = f"ip:{ip_address}:data"
+    redis_client.hset(redis_key, mapping={
+        "visits": redis_client.incr(f"ip:{ip_address}:visits"),
+        "user_agent": user_agent,
+        "timestamp": timestamp,
+        "country": country,
+        "region": region,
+    })
+    redis_client.persist(redis_key)
 
     if request.method == 'POST':
         search_type = request.form.get('search_type')
