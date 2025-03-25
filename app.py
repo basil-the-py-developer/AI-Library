@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import google.generativeai as genai
 from googlesearch import search
 import psycopg2
@@ -212,51 +212,47 @@ def result():
 
 
 @app.route('/contribute', methods=['GET', 'POST'])
-
-
 def contribution():
     if request.method == 'POST':
-        book_name = request.form.get('book_name').strip()
-        author_name = request.form.get('author_name').strip()
-        card_id = request.form.get('card_id').strip()
+        book_name = request.form.get('book_name', '').strip()
+        author_name = request.form.get('author_name', '').strip()
+        card_id = request.form.get('card_id', '').strip()
+        contributer_name = request.form.get('contributer_name', '').strip()
 
         db_connection = connect_to_library_db()
         cursor = db_connection.cursor()
 
         try:
             # Check if the card ID exists in the 'user' table
-            query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s;"""
-            cursor.execute(query, (card_id,))
+            cursor.execute("""SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s;""", (card_id,))
             user = cursor.fetchone()
 
             if not user:
-                message = "Error: Your card ID is not present in the database."
-            else:
-                # Insert the book details into the 'contributed' table
-                insert_query = """
-                INSERT INTO "contributed" ("book", "author", "contributed_by", "DATE")
-                VALUES (%s, %s, %s, CURRENT_DATE);
-                """
-                cursor.execute(insert_query, (book_name, author_name, card_id))
-                db_connection.commit()
+                return jsonify({'status': 'error', 'message': "Error: Your card ID is not present in the database."})
 
-                # Success message
-                message = (
-                    f"Thank you for contributing '{book_name}' by {author_name}! "
-                    "Your contribution data has been recorded. Once the book is received by the librarian, it will be added to the library's collection. "
-                    "You will then earn 2 additional credits on top of your default credit of 2 for each book you contribute. "
-                    "These credits will allow you to reserve an equal number of books per week. Please note that this cycle resets every Sunday."
-                )
+            # Insert the book details into the 'contributed' table
+            insert_query = """
+                INSERT INTO "contributed" ("book", "author", "contributed_by", "contributer_name", "DATE")
+                VALUES (%s, %s, %s, %s, CURRENT_DATE);
+            """
+            cursor.execute(insert_query, (book_name, author_name, card_id, contributer_name))
+            db_connection.commit()
+
+            message = (
+                f"Thank you for contributing '{book_name}' by {author_name}! "
+                "Once the book is received by the librarian, it will be added to the library's collection. "
+                "Your name will be displayed near book."
+            )
+
+            return jsonify({'status': 'success', 'message': message})
 
         except Exception as e:
             app.logger.error(f"Error during contribution: {e}")
-            message = "An error occurred while processing your contribution."
+            return jsonify({'status': 'error', 'message': "An error occurred while processing your contribution."})
 
         finally:
             cursor.close()
             db_connection.close()
-
-        return render_template('contribution_result.html', message=message)
 
     return render_template('contribute.html')
 
@@ -269,12 +265,16 @@ def reserve_book():
 
     if request.method == 'GET':
         try:
-            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available'"""
+            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available' AND "CONTRIBUTED" = 'NO' """
             cursor.execute(query)
             books = cursor.fetchall()
 
+            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" , "IF_YES_NAME" FROM library WHERE "BOOK_STATUS" = 'Available' AND "CONTRIBUTED" = 'YES' """
+            cursor.execute(query)
+            contributed_books = cursor.fetchall()
+
             # Return the list of available books to the user
-            return render_template('reserve.html', books=books)
+            return render_template('reserve.html', books=books, contributed_books=contributed_books)
 
         except Exception as e:
             # Log the error and return a message to the user
