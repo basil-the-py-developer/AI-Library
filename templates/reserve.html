@@ -75,7 +75,7 @@
         }
 
         .book-card:hover {
-            transform: translateY(-3px); /* Slight lift on hover */
+            transform: translateY(-1px); /* Slight lift on hover */
             box-shadow: 0px 6px 12px rgba(60, 52, 52, 0.3);
         }
 
@@ -139,29 +139,57 @@
             color: black; /* Change the text color inside the modal */
         }
 
-        /* Hide scrollbar but still allow scrolling */
+        html, body {
+            overflow: auto; /* Allows scrolling */
+            -ms-overflow-style: none;  /* Hides scrollbar in IE/Edge */
+            scrollbar-width: none;  /* Hides scrollbar in Firefox */
+        }
+
+
         body {
-            overflow: hidden;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer */
             overflow-y: scroll;
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px; /* Thin scrollbar */
-            border-radius: 10px;
+
+
+        .floating-scrollbar {
+            position: fixed;
+            right: 50px; /* Moves it away from the edge */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px; /* Width of the scrollbar */
+            height:85vh; /* Adjust height */
+            background: rgba(179, 179, 179, 0.563);
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            overflow: hidden;
         }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1); /* Track color */
-            border-radius: 10px;
+        .floating-thumb {
+            width: 100%;
+            overflow-y: auto;
+            height: 100%; /* Adjustable */
+            background: rgba(0, 0, 139, 0.6);
+            border-radius: 12px;
+            position: absolute;
+            top: 0;
+            cursor: grab;
+            transition: background 0.3s ease-in-out;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 215, 0, 0.8); /* Goldish scrollbar */
-            border-radius: 10px;
+        .floating-thumb:hover {
+            background: rgba(0, 0, 139, 0.8);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 215, 0, 1);
+
+
+        /* Adjust for smaller screens */
+        @media (max-width: 768px) { 
+            .floating-scrollbar {
+                right: 10px; /* Moves it 50px closer to the left */
+            }
         }
 
 
@@ -323,6 +351,58 @@
 
     </style>
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let scrollbar = document.createElement("div");
+            scrollbar.classList.add("floating-scrollbar");
+
+            let thumb = document.createElement("div");
+            thumb.classList.add("floating-thumb");
+
+            scrollbar.appendChild(thumb);
+            document.body.appendChild(scrollbar);
+
+            // Update scrollbar thumb position on scroll
+            function updateScrollbar() {
+                let scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                let scrollTop = window.scrollY;
+                let thumbHeight = scrollbar.clientHeight * (window.innerHeight / document.documentElement.scrollHeight);
+                let thumbTop = (scrollTop / scrollHeight) * (scrollbar.clientHeight - thumbHeight);
+                thumb.style.height = `${thumbHeight}px`;
+                thumb.style.top = `${thumbTop}px`;
+            }
+
+            window.addEventListener("scroll", updateScrollbar);
+            updateScrollbar(); // Initial positioning
+
+            // Drag functionality for scrollbar thumb
+            let isDragging = false;
+            let startY, startTop;
+
+            thumb.addEventListener("mousedown", (e) => {
+                isDragging = true;
+                startY = e.clientY;
+                startTop = parseFloat(thumb.style.top);
+                document.body.style.userSelect = "none"; // Prevents text selection
+            });
+
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                let deltaY = e.clientY - startY;
+                let scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                let scrollbarHeight = scrollbar.clientHeight - thumb.clientHeight;
+                let newTop = Math.min(scrollbarHeight, Math.max(0, startTop + deltaY));
+                let scrollPos = (newTop / scrollbarHeight) * scrollHeight;
+                thumb.style.top = `${newTop}px`;
+                window.scrollTo(0, scrollPos);
+            }
+        });
+
+        document.addEventListener("mouseup", () => {
+                isDragging = false;
+                document.body.style.userSelect = ""; // Re-enable text selection
+            });
+        });
+
         $(document).ready(function () {
             $('#search-box').focus(); // Automatically focus on search box
         });

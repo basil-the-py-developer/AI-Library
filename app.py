@@ -16,7 +16,7 @@ api_key = os.getenv("API_KEY")
 redis_pass = os.getenv("REDIS_PASS")
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-2.0-flash-exp")
+model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # Initialize Redis for IP tracking
 redis_client = redis.Redis(
@@ -31,7 +31,7 @@ redis_client = redis.Redis(
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["10 per minute"],   
+    #default_limits=["2 per minute"],   
 )
 
 def get_geolocation(ip):
@@ -51,12 +51,11 @@ def connect_to_library_db():
             password=f"{database_password}"                  
         )
 
-def clean_response(response_text):
-    cleaned_text = response_text.replace("*", "").replace("#", "").strip()
-    return cleaned_text
+#def clean_response(response_text):
+    #cleaned_text = response_text.replace("*", "").replace("#", "").strip()
+    #return cleaned_text
 
 @app.route('/', methods=['GET', 'POST'])
-@limiter.limit("10 per minute")  # Apply rate limiting
 def index():
     ip_address = request.remote_addr
     user_agent = request.headers.get("User-Agent", "Unknown")
@@ -83,6 +82,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/result')
+@limiter.limit("3 per minute") 
 def result():
     search_type = request.args.get('search_type')
     search_input = request.args.get('search_input')
@@ -126,7 +126,7 @@ def result():
             "If the author name is invalid or not found include 'No Information found about the author' in your response."
 
         )
-        cleaned_response = clean_response(response.text)
+        cleaned_response = response.text
 
         if "No Information found about the author" in cleaned_response:
             # If AI says no results, perform a web search
@@ -178,7 +178,7 @@ def result():
              # "If the book name is invalid or not found include 'No summary found' in your response."
         )
 
-        cleaned_response = clean_response(response.text)
+        cleaned_response = response.text
 
 
         if "No summary found" in cleaned_response:
@@ -299,8 +299,8 @@ def reserve_book():
                 cursor.execute(query, (card_id,))
                 reserved_count = cursor.fetchone()[0]
 
-                if reserved_count >= 2:
-                    message = "Reservation not confirmed. You have already reserved 2 books, which is the maximum limit."
+                if reserved_count >= 1:
+                    message = "Reservation not confirmed. You have already reserved 1 books, which is the maximum limit."
                 else:
                     # Check if the book is available
                     query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
