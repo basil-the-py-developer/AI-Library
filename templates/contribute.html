@@ -6,8 +6,11 @@
     <title>Contribute a Book</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="/_vercel/insights/script.js" async></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
+
     <style>
         body {
             background: url('/static/back.jpg') no-repeat center center fixed;
@@ -51,8 +54,7 @@
             background-color: rgba(0, 0, 139, 0.6);
             border-radius: 6px;
             transition: background-color 0.3s, transform 0.3s;
-            margin-top: 4px; /* Moves the navbar button 2px down */
-            
+            margin-top: 4px;
         }
 
         .navbar a:hover {
@@ -60,24 +62,29 @@
             transform: scale(1.05);
         }
 
-        html {
-            scroll-behavior: smooth;
+        .modal-content {
+            background-color: #fff; 
+            color: #000; /* Black text for visibility */
+            border-radius: 10px;
         }
 
-        .form-group input {
-            margin-bottom: 15px;
-        }
-        @media (max-width: 576px) {
-            .navbar a {
-                padding: 10px 16px;
-                margin-top: 10px; /* Adds space above the button */
-                margin-bottom: 20px; /* Adds space below the button */
-            }
+        .modal-body {
+            font-size: 16px;
+            color: #000; /* Black text for visibility */
         }
 
+        .modal-footer .btn {
+            background-color: #004080; /* Dark blue button */
+            color: #fff;
+        }
+
+        .modal-footer .btn:hover {
+            background-color: #002b55;
+        }
     </style>
 </head>
 <body>
+
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="navbar-nav">
             <a class="nav-item-nav-link" href="/">Back to Search</a>
@@ -86,7 +93,7 @@
 
     <div class="container">
         <h1 class="text-center">Contribute a Book</h1>
-        <form method="POST" class="mt-1">
+        <form id="contributeForm" method="POST" class="mt-1">
             <div class="form-group">
                 <label for="book_name">Book Name:</label>
                 <input type="text" class="form-control" id="book_name" name="book_name" required>
@@ -96,6 +103,10 @@
                 <input type="text" class="form-control" id="author_name" name="author_name" required>
             </div>
             <div class="form-group">
+                <label for="contributer_name">Contributor Name:</label>
+                <input type="text" class="form-control" id="contributer_name" name="contributer_name" required>
+            </div>
+            <div class="form-group">
                 <label for="card_id">Contributor's Card ID:</label>
                 <input type="text" class="form-control" id="card_id" name="card_id" required>
             </div>
@@ -103,13 +114,46 @@
         </form>
     </div>
 
-    <div class="container text-center py-3 mt-4">
-        <p>Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
-        <p>
-            <a href="https://basilsportfolio.w3spaces.com/index.html" target="_blank">Portfolio</a> |
-            <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank">Connect on LinkedIn</a>
-        </p>
-        <p>© 2024 Swastha AI. All Rights Reserved.</p>
+    <!-- Modal Popup -->
+    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">Submission Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="messageContent">
+                    <!-- Message from backend will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#contributeForm").submit(function(event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: "/contribute",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $("#messageContent").html(response.message);
+                        $("#messageModal").modal("show");
+                    },
+                    error: function() {
+                        $("#messageContent").html("An error occurred while processing your contribution.");
+                        $("#messageModal").modal("show");
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>

@@ -161,6 +161,48 @@
             margin-bottom: 10px;
         }
 
+        .star-badge {
+            font-size: 1.4rem;
+            color: gold;
+            position: absolute;
+            bottom: 50px;
+            right: 10%;
+            transform: translateX(50%);
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        /* Hover Effect */
+        .star-badge:hover {
+            transform: translateX(50%) scale(1.2); /* Slightly enlarges the star */
+            color: #ffd700; /* Makes it a brighter gold */
+        }
+
+        /* Tooltip */
+        .star-badge::after {
+            content: "Contributed by " attr(data-contributor);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            border-radius: 6px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        /* Tooltip on Hover */
+        .star-badge:hover::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-3px); /* Slight lift */
+        }
+
         footer {
             height: 20px; 
             background-color: transparent;
@@ -197,6 +239,9 @@
                                 <strong>Status:</strong> {{ result.bk_status }}<br>
                                 {% if result.bk_status == 'Issued' %}
                                     <strong>Available by:</strong> {{ result.due_date }}<br>
+                                {% endif %}
+                                {% if result.contributed == 'YES' %}
+                                    <span class="star-badge" data-contributor="{{ result.contributor }}">⭐</span>
                                 {% endif %}
                             </li>
                         {% endfor %}
