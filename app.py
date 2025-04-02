@@ -9,12 +9,11 @@ import redis
 import requests
 from datetime import datetime
 
-
 app = Flask(__name__)
+
 database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
 redis_pass = os.getenv("REDIS_PASS")
-
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
@@ -100,35 +99,41 @@ def result():
 
     if search_type == "Search by Author":
         query = """
-        SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME"
-        FROM library
-        WHERE similarity("AUTHOR_NAME", %s) > 0.3
-           OR "AUTHOR_NAME" ILIKE %s;
+            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME"
+            FROM library
+            WHERE similarity("AUTHOR_NAME", %s) > 0.3
+            OR "AUTHOR_NAME" ILIKE %s
+            ORDER BY similarity("AUTHOR_NAME", %s) DESC
+            LIMIT 10;
         """
-        cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
+        cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
         books = cursor.fetchall()
 
         if books:
             for book in books:
-                bk_name, bk_id, bk_status, author_name = book
+                bk_name, bk_id, bk_status, author_name, contributed, contributor= book
                 results.append({
                     "bk_name": bk_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
-                    "author_name": author_name
+                    "author_name": author_name,
+                    "contributed": contributed,
+                    "contributor": contributor
                 })
 
         else:
             pass
         # Handle the case where no books are found
         response = model.generate_content(
-            f"Get details about the author {search_input} and books by the author."
-            "If the author name is invalid or not found include 'No Information found about the author' in your response."
+            f"""Get details about {search_input} and books by the author/publisher.
+                Do not use '**' and '##' in your response because it will not work, arrange you response in a pretty manner. 
+                Only include the details, do not include any talks or questions 
+                If {search_input} is invalid or not known, include 'No Information found' in your response."""
 
         )
         cleaned_response = response.text
 
-        if "No Information found about the author" in cleaned_response:
+        if "No Information found" in cleaned_response:
             # If AI says no results, perform a web search
             links = list(search(f"Details about the author '{search_input_upper}'", num_results=3))
             cleaned_response = f"No results found for the author '{search_input}'. Refer to the related links below."
@@ -146,66 +151,58 @@ def result():
 
     elif search_type == "Search by Book":
         query = """
-        SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME"
-        FROM library
-        WHERE similarity("BK_NAME", %s) > 0.3
-           OR "BK_NAME" ILIKE %s;
+            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME"
+            FROM library
+            WHERE similarity("BK_NAME", %s) > 0.3
+            OR "BK_NAME" ILIKE %s
+            ORDER BY similarity("BK_NAME", %s) DESC
+            LIMIT 10;
         """
-        cursor.execute(query, (f"{search_input_upper}",f"%{search_input_upper}%"))
+        cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
         books = cursor.fetchall()
 
         results = []
         if books:
             for book in books:
-                bk_name, bk_id, bk_status, author_name = book
-                output = {
+                bk_name, bk_id, bk_status, author_name, contributed, contributor= book
+                results.append({
                     "bk_name": bk_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
                     "author_name": author_name,
-                }
-                results.append(output)
+                    "contributed": contributed,
+                    "contributor": contributor
+                })
 
         else:
             pass
 
         # Generate AI response about the book and the author regardless of book presence
         response = model.generate_content(
-            f"Get a summary of the Novel '{search_input}' and information about the author. "
-             # "nothing other than the summary of the Novel/book and information about the author should be included in the output. "
-             # "Also triple check if the author name is correct. Do not make a mistake. "
-             # "Present the Summary in a clear and enagaing way. There should be a heading for the summary on the top. " 
-             # "If the book name is invalid or not found include 'No summary found' in your response."
+            f"""Get a summary of the Novel '{search_input}' and information about the author.
+                Do not use '**' and '##' in your response because it will not work, arrange you response in a pretty manner
+                If the book name is invalid or not found include 'No summary found' in your response."""
         )
 
         cleaned_response = response.text
 
 
         if "No summary found" in cleaned_response:
-            bk_links = []
+            links = []
             # Search online for additional details when no summary is found
             bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
 
             # Update response to include a note about related links
             cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
 
-            return render_template(
-                'result.html',
-                results=results,  # Pass any database results or an empty list if none
-                generated_info=cleaned_response,  # Message about missing summary
-                search_input=search_input,
-                original_input=original_input,
-                links=bk_links  # Pass related links
-            )
-        else:
-            return render_template(
-                'result.html',
-                results=results,  # Pass database results
-                generated_info=cleaned_response,  # AI-generated response
-                search_input=search_input,
-                original_input=original_input,
-                links=[]  # No links since AI provided a response
-            )
+        return render_template(
+            'result.html',
+            results=results,  # Pass any database results or an empty list if none
+            generated_info=cleaned_response,  # Message about missing summary
+            search_input=search_input,
+            original_input=original_input,
+            links=links  # Pass related links
+        )
 
     cursor.close()
     db_connection.close()
