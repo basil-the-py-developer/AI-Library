@@ -149,6 +149,10 @@
         .list-group-item a:hover {
             text-decoration: underline;
         }
+        .list-group-item:has(.star-badge) {
+            min-height: 150px; /* Adjust to your preferred height */
+        }
+
 
         .navbar {
             background-color: transparent;
@@ -165,20 +169,18 @@
             font-size: 1.4rem;
             color: gold;
             position: absolute;
-            bottom: 50px;
-            right: 10%;
+            bottom: 10px;
+            right: 50%;
             transform: translateX(50%);
             cursor: pointer;
             transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
         }
 
-        /* Hover Effect */
         .star-badge:hover {
-            transform: translateX(50%) scale(1.2); /* Slightly enlarges the star */
-            color: #ffd700; /* Makes it a brighter gold */
+            transform: translateX(50%) scale(1.2); 
+            color: #ffd700; 
         }
 
-        /* Tooltip */
         .star-badge::after {
             content: "Contributed by " attr(data-contributor);
             position: absolute;

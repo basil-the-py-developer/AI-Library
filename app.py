@@ -14,8 +14,6 @@ app = Flask(__name__)
 database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
 redis_pass = os.getenv("REDIS_PASS")
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # Initialize Redis for IP tracking
 redis_client = redis.Redis(
@@ -29,8 +27,7 @@ redis_client = redis.Redis(
 # Set up rate limiter
 limiter = Limiter(
     get_remote_address,
-    app=app,
-    #default_limits=["2 per minute"],   
+    app=app,   
 )
 
 def get_geolocation(ip):
@@ -50,10 +47,6 @@ def connect_to_library_db():
             password=f"{database_password}"                  
         )
 
-#def clean_response(response_text):
-    #cleaned_text = response_text.replace("*", "").replace("#", "").strip()
-    #return cleaned_text
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     ip_address = request.remote_addr
@@ -65,7 +58,7 @@ def index():
     first_visit = existing_data.get("first_visit", timestamp)
     visits = int(existing_data.get("visits", 0)) + 1
     redis_client.hset(redis_key, mapping={
-        "first_visit": first_visit,
+        "first_visit": first_visit,         
         "last_visit": timestamp,
         "visits": visits,
         "user_agent": user_agent,
@@ -77,7 +70,8 @@ def index():
     if request.method == 'POST':
         search_type = request.form.get('search_type')
         search_input = request.form.get('search_input').strip()
-        return redirect(url_for('result', search_type=search_type, search_input=search_input))
+        ai_model = 'sw_value' in request.form
+        return redirect(url_for('result', search_type=search_type, search_input=search_input, ai_model=ai_model))
     return render_template('index.html')
 
 @app.route('/result')
@@ -85,14 +79,19 @@ def index():
 def result():
     search_type = request.args.get('search_type')
     search_input = request.args.get('search_input')
-    original_input = request.args.get('original_input', None)
+    fastmodel = request.args.get('ai_model') == 'False' # it was str so converted it to bool
 
+    genai.configure(api_key=api_key)
+    if fastmodel:
+        model = genai.GenerativeModel("gemini-2.0-flash-lite")
+    else:
+        model = genai.GenerativeModel("gemini-2.5-pro-exp-03-25")
+        
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
 
-    
-    search_input_upper = search_input.upper()
 
+    search_input_upper = search_input.upper()
     results = []
     cleaned_response = ""
     links = []
@@ -144,7 +143,6 @@ def result():
             results=results,
             generated_info=cleaned_response,
             search_input=search_input,
-            original_input=original_input,
             links=links
         )
 
@@ -174,33 +172,55 @@ def result():
                     "contributor": contributor
                 })
 
-        else:
-            pass
-
         # Generate AI response about the book and the author regardless of book presence
         response = model.generate_content(
-            f"""Get a summary of the Novel '{search_input}' and information about the author.
-                Do not use '**' and '##' in your response because it will not work, arrange you response in a pretty manner
-                If the book name is invalid or not found include 'No summary found' in your response."""
+                f"""
+                    You are a helpful assistant for a library app.
+
+                    The user has searched for a book titled: "{search_input}".
+
+                    Your task is to:
+                    1. Determine what kind of book it is — for example, is it a novel, story, biography, textbook, dictionary, reference manual, or something else?
+                    2. If the book is a **story-based work** (like a novel, short story collection, or biography), generate a **summary** of its content point wise and add it under the section **Book Summary**.
+                    3. If the book is **non-narrative**, like a **dictionary**, **encyclopedia**, **manual**, or **technical reference**, do **not** generate a summary. Instead, briefly **describe what the book is about**.
+                    4. If the author's name is known, add detail information in a separate section titled **About the Author**.
+                    5. If other informations like **Genre**, **Language**, **Setting**, **Pages**, **Publisher**, **Publication Date** are known. add it to a seperate section **Other details**.
+                    5. If the book is not valid or no information is found, reply with **"No summary found."**
+
+                    **Important:** Do not include phrases like "Okay, I'm ready", "Here's how I will respond", or any introduction. Just output the clean result starting with the relevant section title.
+                    
+                    Use clear formatting like this:
+                    [Title (In most cases it should be the name of the book)]
+
+                    **Book Summary**
+                    [response here]
+
+                    **About the Author**
+                    [optional section here]
+
+                    **Other details:**
+                    [response here]
+
+                    Be concise, fact-based, and avoid making up details. If the title sounds generic or non-narrative, do not treat it as a story.
+                """
         )
 
-        cleaned_response = response.text
 
-
-        if "No summary found" in cleaned_response:
+        if "No summary found" in response.text:
             links = []
             # Search online for additional details when no summary is found
             bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
 
             # Update response to include a note about related links
             cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
+        else:
+            cleaned_response = response.text.replace('***', '').replace('**', '').replace('##', '').replace('#', '')
 
         return render_template(
             'result.html',
             results=results,  # Pass any database results or an empty list if none
-            generated_info=cleaned_response,  # Message about missing summary
+            generated_info=cleaned_response, 
             search_input=search_input,
-            original_input=original_input,
             links=links  # Pass related links
         )
 
@@ -259,19 +279,27 @@ def reserve_book():
     # Initialize the db connection and cursor outside of the method block
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
-
+    results=[]
     if request.method == 'GET':
         try:
-            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" FROM library WHERE "BOOK_STATUS" = 'Available' AND "CONTRIBUTED" = 'NO' """
+            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS", "SHELF_NO", "RACK_NO", "CONTRIBUTED", "IF_YES_NAME" FROM library WHERE "BOOK_STATUS" = 'Available' """
             cursor.execute(query)
             books = cursor.fetchall()
+            if books:
+                for book in books:
+                    bk_id, bk_name, author_name, bk_status, shelf_no, rack_no, contributed, contributor = book
+                    results.append({
+                        "bk_name": bk_name,
+                        "bk_id": bk_id,
+                        "bk_status": bk_status,
+                        "author_name": author_name,
+                        "shelf_no": shelf_no,
+                        "rack_no": rack_no,
+                        "contributed": contributed,
+                        "contributor": contributor
+                    })
 
-            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS" , "IF_YES_NAME" FROM library WHERE "BOOK_STATUS" = 'Available' AND "CONTRIBUTED" = 'YES' """
-            cursor.execute(query)
-            contributed_books = cursor.fetchall()
-
-            # Return the list of available books to the user
-            return render_template('reserve.html', books=books, contributed_books=contributed_books)
+            return render_template('reserve.html', results=results)
 
         except Exception as e:
             # Log the error and return a message to the user
