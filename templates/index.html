@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="XGn3FqWPuLezTmI_cmb1RplnATqDCtQdHZhBmv62-tg" />
     <title>Benhill School's AI Integrated Student Book Guide</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <script src="/_vercel/insights/script.js" async></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
+
     <style>
         body {
             background-image: url('/static/back.jpg');
@@ -25,21 +25,26 @@
 
         .container {
             background-color: rgba(18, 18, 18, 0.8);
-            padding: 40px;
-            border-radius: 12px;
+            padding: 45px;
+            border-radius: 25px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 600px;
+            max-width: 650px;
+            margin: 40px auto 10px; 
             position: relative;
             z-index: 1;
-            max-height: 100vh;
-            height: 100%;
-            overflow-y: auto;
         }
 
-        h1 {
+        .container h1 {
             font-family: 'Poppins', sans-serif;
+            font-size: 2.3rem;
+            text-align: center;
+            margin-bottom: 25px;
             color: #ffffff;
+        }
+
+        .footer-container {
+            margin-top: 25px;
         }
 
         .btn-custom {
@@ -47,7 +52,7 @@
             padding: 10px 16px;
             background-color: rgba(0, 0, 139, 0.6);
             border-radius: 6px;
-            color: #ddcccc;  /* Change text color to white for better contrast */
+            color: #ddcccc;
             text-align: center;
             font-size: 16px;
             text-decoration: none;
@@ -60,14 +65,14 @@
         .btn-custom:hover {
             background-color: rgba(0, 0, 139, 0.8);
             transform: scale(1.05);
-            color: #c4acac;  /* Ensure text stays white on hover */
-            text-decoration: none;  /* Remove underline on hover */
+            color: #c4acac;
+            text-decoration: none;
         }
 
-
-        .btn-custom:focus {
-            outline: none;
+        .btn.btn-primary {
+            border-radius: 12px; 
         }
+
 
         .navbar {
             background-color: transparent;
@@ -93,6 +98,62 @@
             scroll-behavior: smooth;
         }
 
+     
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+            margin-left: 15px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider::before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+
+        input:checked + .slider::before {
+            transform: translateX(24px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round::before {
+            border-radius: 50%;
+        }
+
         .nav-buttons {
             display: flex;
             justify-content: space-between;
@@ -103,24 +164,135 @@
             padding: 0 20px;
         }
 
-
         .text-center.py-3 {
             text-align: center;
             padding: 1rem 0;
         }
+        
+        .toggle-right {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .toggle-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px 10px; /* Further reduced padding */
+            border-radius: 8px;
+            margin-bottom: 10px; /* Adjust spacing */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #toggleStatusBox {
+            max-width: 470px;
+            padding: 6px 10px;
+            font-size: 12px;
+            line-height: 1.4;
+            text-align: left;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            right: 2px;
+            transition: background-color 0.4s ease;
+        }
+
+        #toggleStatus {
+            font-size: 12px; /* Smaller font */
+            display: block;
+            white-space: normal; /* Allow text wrapping */
+        }
+
+        .blue-bg {
+            background-color: rgba(0, 123, 255, 0.2);
+            color: #cce6ff;
+        }
+
+        .green-bg {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #d4f8dd;
+        }
+
+        #toggleStatusBox span {
+            font-size: 13px; 
+        }
+
+
+        .switch .slider {
+            background-color: rgba(72, 201, 120, 0.4);
+        }
+
+        .switch input:checked + .slider {
+            background-color: rgba(18, 133, 255, 0.544); /* Transparent dark blue */
+        }
+
+        .slider::before {
+            background-color: white;
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 30px;
+                margin-top: 55px;
+                
+            }
+            .footer-container {
+                margin-top: 20px;
+            }
+
+            .toggle-right {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .switch {
+                margin-bottom: 10px;
+                margin-left: 0;
+            }
+
+            #toggleStatusBox {
+                width: 100%;
+                max-width: 510px;
+                font-size: 13px;
+                padding: 7px;
+                right: 0px;
+            }
+
+            .toggle-card {
+                padding: 10px;
+            }
+        }
+        @media (max-width: 400px) {
+            .switch {
+                width: 45px;
+                height: 24px;
+            }
+
+            .switch .slider::before {
+                height: 20px;
+                width: 20px;
+            }
+        }
+        .highlight {
+            background-color: rgba(255, 230, 0, 0.4); /* Light yellow background */
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-    </nav>
+
+    <nav class="navbar navbar-expand-lg navbar-dark"></nav>
 
     <div class="nav-buttons">
         <a href="/contribute" class="btn-custom">Contribute a Book</a>
         <a href="/reserve" class="btn-custom">Reserve a Book</a>
     </div>
 
-    <div class="container mt-5">
-        <h1 class="text-center">AI Integrated Student Book Guide</h1>
+    <div class="container mt-6">
+        <h1>AI Integrated Student Book Guide</h1>
         <form method="POST" class="mt-4">
             <div class="form-group">
                 <label for="search_type">Select Search Type:</label>
@@ -129,15 +301,34 @@
                     <option value="Search by Author">Search by Author</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label for="search_input">Enter Author/Book Name:</label>
                 <input type="text" class="form-control" id="search_input" name="search_input" required>
             </div>
-            <button type="submit" class="btn btn-primary">Search</button>
+
+            <!-- Toggle card with switch and status inside -->
+            <div class="toggle-card">
+                <div class="toggle-right">
+                    <label class="switch">
+                        <input type="checkbox" name="sw_value" id="aiToggle" value="true">
+                        <span class="slider round"></span>
+                    </label>
+                    <div id="toggleStatusBox" class="green-bg">
+                        <span id="toggleStatus">
+                            <span> Quick Info Mode: Fast responses with concise summaries. Ideal for common</span><br>
+                            <span> books but may miss key details or rare titles due to a limited model.</span>
+                        </span>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block mt-3">Search</button>
         </form>
     </div>
 
-    <div class="container text-center py-3 mt-5">
+    <div class="container text-center py-3 footer-container">
         <p>Developed by <strong>Basil</strong><br>Presented by Class XII Batch 2024-25.</p>
         <p>
             <a href="https://basil-the-py-developer.github.io/portfolio" target="_blank">Portfolio</a> |
@@ -145,6 +336,56 @@
         </p>
         <p>© 2024 Swastha AI. All Rights Reserved.</p>
     </div>
-    
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggle = document.getElementById("aiToggle");
+            const statusBox = document.getElementById("toggleStatusBox");
+            const slider = document.querySelector(".slider");
+
+            function updateStatusBox(isChecked) {
+                const isMobile = window.matchMedia("(max-width: 576px)").matches;
+
+                if (isChecked) {
+                    statusBox.classList.remove("green-bg");
+                    statusBox.classList.add("blue-bg");
+                    statusBox.innerHTML = isMobile
+                        ? `<span class="line"><span class="highlight">Detailed Info Mode:</span> Slower, yet precise and</span><br>
+                        <span class="line">in-depth. Ideal for infamous books, deep insights</span><br>
+                        <span class="line">and comprehensive coverage.</span>`
+                        : `<span class="line"><span class="highlight">Detailed Info Mode:</span> Slower, yet precise and in-depth. Ideal for infamous     </span><br>
+                        <span class="line">books deep insights and comprehensive coverage.</span>`;
+                    slider.style.backgroundColor = "rgba(18, 133, 255, 0.544)";
+                } else {
+                    statusBox.classList.remove("blue-bg");
+                    statusBox.classList.add("green-bg");
+                    statusBox.innerHTML = isMobile
+                        ? `<span class="line"><span class="highlight">Quick Info Mode:</span> Gives fast, clear summaries</span><br>
+                        <span class="line">for well-known books. May not cover obscure or</span><br>
+                        <span class="line">infamous titles because of limited data coverage.</span>`
+                        : `<span class="line"><span class="highlight">Quick Info Mode:</span> Gives fast, clear summaries for well-known books. But</span><br>
+                        <span class="line">may not cover obscure or infamous titles because of limited data coverage.</span>`;
+                    slider.style.backgroundColor = "rgba(72, 201, 120, 0.4)";
+                }
+            }
+
+            // Initial setup
+            updateStatusBox(toggle.checked);
+
+            // Toggle event listener
+            toggle.addEventListener("change", function () {
+                updateStatusBox(this.checked);
+            });
+
+            // Update on screen resize to stay responsive
+            window.addEventListener("resize", function () {
+                updateStatusBox(toggle.checked);
+            });
+        });
+
+
+
+    </script>
+
 </body>
 </html>

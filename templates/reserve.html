@@ -42,30 +42,32 @@
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            justify-content: center; /* Centers cards */
+            justify-content: center; 
         }
 
         .book-card {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            width: 100%; /* Ensures uniform width */
-            max-width: 280px; /* Keeps all cards the same width */
-            height: 350px; /* Fixed height to maintain uniformity */
-            padding: 18px;
-            background: #1E1E1E; /* Dark clean background */
+            width: 100%; 
+            max-width: 280px; 
+            height: 350px; 
+            padding: 20px;
+            background: #1E1E1E; 
             color: #FFFFFF;
             border-radius: 12px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
             transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
             border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
+            position: relative;
         }
 
         .book-card h5 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
+            margin-top: 5px;
             white-space: normal;
             display: -webkit-box;
             -webkit-line-clamp: 2; /* Limits title to 2 lines */
@@ -184,15 +186,6 @@
         }
 
 
-
-        /* Adjust for smaller screens */
-        @media (max-width: 768px) { 
-            .floating-scrollbar {
-                right: 10px; /* Moves it 50px closer to the left */
-            }
-        }
-
-
         #search-box {
             width: 100%;
             max-width: 800px; /* Increased max width for larger screens */
@@ -219,7 +212,6 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
-        /* Ensure it adapts well to smaller screens */
         @media (max-width: 768px) {
             #search-box {
                 max-width: 90%; /* Adjust width for smaller screens */
@@ -227,9 +219,6 @@
             }
         }
 
-
-
-        /* Back Button */
         .back-btn {
             position: absolute;
             top: 20px;
@@ -247,21 +236,10 @@
             transform: scale(1.05);
         }
 
-                /* Media Query for Small Screens */
-        @media (max-width: 576px) {
-            .back-btn {
-                top: 25px; /* Adjust top position */
-                left: 25px; /* Adjust left position */
-                padding: 10px 17px; /* Increase padding for a bigger button */
-                font-size: 16px; /* Increase font size */
-                position: fixed; /* Make it fixed to stay in place when scrolling */
-            }
-        }
 
         @media (max-width: 768px) {
-            body {
-                background-attachment: scroll !important;
-                background-size: cover;
+            .floating-scrollbar {
+                display: none;
             }
         }
 
@@ -276,7 +254,6 @@
                 margin: auto;
             }
         }
-
 
 
         .container h2 {
@@ -315,13 +292,13 @@
             transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
         }
 
-        /* Hover Effect */
+        
         .star-badge:hover {
-            transform: translateX(50%) scale(1.2); /* Slightly enlarges the star */
-            color: #ffd700; /* Makes it a brighter gold */
+            transform: translateX(50%) scale(1.2); 
+            color: #ffd700; 
         }
 
-        /* Tooltip */
+        
         .star-badge::after {
             content: "Contributed by " attr(data-contributor);
             position: absolute;
@@ -339,69 +316,116 @@
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
 
-        /* Tooltip on Hover */
         .star-badge:hover::after {
             opacity: 1;
             visibility: visible;
-            transform: translateX(-50%) translateY(-3px); /* Slight lift */
+            transform: translateX(-50%) translateY(-3px); 
         }
 
-
-
-
     </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let scrollbar = document.createElement("div");
-            scrollbar.classList.add("floating-scrollbar");
+</head>
+<body>
+    <a href="/" class="back-btn">Back to Search</a>
+    <div class="container mt-5">
+        <h2 class="text-center heading">Available Books</h2>
+        <input type="text" id="search-box" class="form-control my-4" placeholder="Search for a book..." />
+    
+        <div class="book-grid">
+            {% for book in results %}
+            <div class="book-card fade-in">
+                <div class="content">
+                    <h5>{{ book.bk_name }}</h5> <!-- Book Name -->
+                    <p><strong>Author:</strong> {{ book.author_name }}</p> 
+                    <p><strong>Book ID:</strong> {{ book.bk_id }}</p> 
+                    <p><strong>Status:</strong> {{ book.bk_status }}</p>
+                    <p><strong>Shelf No.:</strong> {{ book.shelf_no }}</p>
+                    <p><strong>Rack No.:</strong> {{ book.rack_no }}</p>
+                    {% if book.contributed == 'YES' %}
+                        <span class="star-badge" data-contributor="{{ book.contributor }}">⭐</span>
+                    {% endif %} 
+                </div>
+                <button type="button" class="btn btn-primary reserve-btn"
+                        data-book-id="{{ book.bk_id }}" 
+                        data-book-name="{{ book.bk_name }}">Reserve
+                </button>
+            </div>
+            {% endfor %}
+        </div>
 
-            let thumb = document.createElement("div");
-            thumb.classList.add("floating-thumb");
+    </div>
+    
+    <div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/reserve" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reserveModalLabel">Reserve Book</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>You are reserving: <strong id="bookNameDisplay"></strong></p>
+                        <div class="mb-3">
+                            <label for="cardIdInput" class="form-label">Enter Your Card ID (Admission Number)</label>
+                            <input type="text" class="form-control" id="cardIdInput" name="card_id" required placeholder="Enter your card ID">
+                        </div>
+                        <input type="hidden" id="bookIdInput" name="book_id">
+                        <input type="hidden" name="user_name" value="{{ user_name }}">
+                        <input type="hidden" name="contact" value="{{ contact }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Confirm Reservation</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const scrollbar = document.createElement("div");
+            scrollbar.className = "floating-scrollbar";
+
+            const thumb = document.createElement("div");
+            thumb.className = "floating-thumb";
 
             scrollbar.appendChild(thumb);
             document.body.appendChild(scrollbar);
 
-            // Update scrollbar thumb position on scroll
-            function updateScrollbar() {
-                let scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-                let scrollTop = window.scrollY;
-                let thumbHeight = scrollbar.clientHeight * (window.innerHeight / document.documentElement.scrollHeight);
-                let thumbTop = (scrollTop / scrollHeight) * (scrollbar.clientHeight - thumbHeight);
-                thumb.style.height = `${thumbHeight}px`;
-                thumb.style.top = `${thumbTop}px`;
-            }
+            const updateScrollbar = () => {
+                const sh = document.documentElement.scrollHeight - window.innerHeight;
+                const th = scrollbar.clientHeight * (window.innerHeight / document.documentElement.scrollHeight);
+                const st = window.scrollY;
+                thumb.style.height = `${th}px`;
+                thumb.style.top = `${(st / sh) * (scrollbar.clientHeight - th)}px`;
+            };
 
             window.addEventListener("scroll", updateScrollbar);
-            updateScrollbar(); // Initial positioning
+            updateScrollbar();
 
-            // Drag functionality for scrollbar thumb
-            let isDragging = false;
-            let startY, startTop;
-
-            thumb.addEventListener("mousedown", (e) => {
+            let isDragging = false, startY, startTop;
+            thumb.onmousedown = e => {
                 isDragging = true;
                 startY = e.clientY;
                 startTop = parseFloat(thumb.style.top);
-                document.body.style.userSelect = "none"; // Prevents text selection
-            });
+                document.body.style.userSelect = "none";
+            };
 
-        document.addEventListener("mousemove", (e) => {
-            if (isDragging) {
-                let deltaY = e.clientY - startY;
-                let scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-                let scrollbarHeight = scrollbar.clientHeight - thumb.clientHeight;
-                let newTop = Math.min(scrollbarHeight, Math.max(0, startTop + deltaY));
-                let scrollPos = (newTop / scrollbarHeight) * scrollHeight;
-                thumb.style.top = `${newTop}px`;
-                window.scrollTo(0, scrollPos);
-            }
-        });
+            document.onmousemove = e => {
+                if (!isDragging) return;
+                const dy = e.clientY - startY;
+                const sh = document.documentElement.scrollHeight - window.innerHeight;
+                const maxTop = scrollbar.clientHeight - thumb.clientHeight;
+                const newTop = Math.min(maxTop, Math.max(0, startTop + dy));
+                window.scrollTo(0, (newTop / maxTop) * sh);
+            };
 
-        document.addEventListener("mouseup", () => {
+            document.onmouseup = () => {
                 isDragging = false;
-                document.body.style.userSelect = ""; // Re-enable text selection
-            });
+                document.body.style.userSelect = "";
+            };
         });
+
 
         $(document).ready(function () {
             $('#search-box').focus(); // Automatically focus on search box
@@ -430,84 +454,5 @@
 
     </script>
     
-    
-</head>
-<body>
-    <!-- Back Button -->
-    <a href="/" class="back-btn">Back to Search</a>
-
-    <div class="container mt-5">
-        <h2 class="text-center heading">Available Books</h2>
-        <input type="text" id="search-box" class="form-control my-4" placeholder="Search for a book..." />
-    
-        <div class="book-grid">
-            {% for book in books %}
-            <div class="book-card fade-in">
-                <div class="content">
-                    <h5>{{ book[1] }}</h5> <!-- Book Name -->
-                    <p><strong>Author:</strong> {{ book[2] }}</p> <!-- Author Name -->
-                    <p><strong>Book ID:</strong> {{ book[0] }}</p> <!-- Book ID -->
-                    <p><strong>Status:</strong> {{ book[3] }}</p> <!-- Book Status -->
-                </div>
-                <button type="button" class="btn btn-primary reserve-btn"
-                        data-book-id="{{ book[0] }}" 
-                        data-book-name="{{ book[1] }}">
-                    Reserve
-                </button>
-            </div>
-            {% endfor %}
-    
-            {% for book in contributed_books %}
-            <div class="book-card fade-in contributed">
-                <div class="content">
-                    <h5>{{ book[1] }}</h5> <!-- Book Name -->
-                    <p><strong>Author:</strong> {{ book[2] }}</p> <!-- Author Name -->
-                    <p><strong>Book ID:</strong> {{ book[0] }}</p> <!-- Book ID -->
-                    <p><strong>Status:</strong> {{ book[3] }}</p> <!-- Book Status -->
-                    <p><strong>Contributor:</strong> {{ book[4] }}</p> <!-- Contributor Name -->
-                </div>
-                <div class="star-badge" data-contributor="{{ book[4] }}">⭐</div> <!-- Golden star -->
-                <button type="button" class="btn btn-primary reserve-btn"
-                        data-book-id="{{ book[0] }}" 
-                        data-book-name="{{ book[1] }}">
-                    Reserve
-                </button>
-            </div>
-            {% endfor %}
-
-
-        </div>
-    </div>
-    
-    
-
-    <!-- Reserve Modal -->
-    <div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="/reserve" method="POST">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="reserveModalLabel">Reserve Book</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>You are reserving: <strong id="bookNameDisplay"></strong></p>
-                        <div class="mb-3">
-                            <label for="cardIdInput" class="form-label">Enter Your Card ID (Admission Number)</label>
-                            <input type="text" class="form-control" id="cardIdInput" name="card_id" required placeholder="Enter your card ID">
-                        </div>
-                        <!-- Hidden inputs to pass book and user details -->
-                        <input type="hidden" id="bookIdInput" name="book_id">
-                        <input type="hidden" name="user_name" value="{{ user_name }}">
-                        <input type="hidden" name="contact" value="{{ contact }}">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Confirm Reservation</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
