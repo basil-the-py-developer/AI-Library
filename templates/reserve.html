@@ -5,323 +5,360 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reserve Book</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/_vercel/insights/script.js" async></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
     <style>
-        body { 
-            background: url('/static/back.jpg') no-repeat center center fixed; 
-            background-size: cover;
-            color: #E0DFCA;
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            position: relative;
-            overflow-x: hidden;
-            min-height: 100vh;
-            background-size: 100% 100%;
-            
-        }
+    body { 
+        background: url('/static/back.jpg') no-repeat center center fixed; 
+        background-size: 100% 100%;
+        color: #E0DFCA;
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        position: relative;
+        overflow-x: hidden;
+        min-height: 100vh;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        -ms-overflow-style: none; 
+    }
+    
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/static/back.jpg') no-repeat center center;
+        background-size: cover;
+        z-index: -1;
+    }
+    
+    html, body {
+        overflow: auto; 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    }
+    
+   
+    .heading {
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        color: #f5f5f5;
+        margin-bottom: 20px;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+    }
+    
+    .scrolled .heading {
+        opacity: 0;
+    }
+    
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('/static/back.jpg') no-repeat center center;
-            background-size: cover;
-            z-index: -1;
-        }
-
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    
+    @media (max-width: 576px) {
         .book-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center; 
+            grid-template-columns: 1fr;
+            gap: 10px;
         }
+    }
+    
 
+    .book-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 280px;
+        height: 350px;
+        padding: 20px;
+        background: #1E1E1E;
+        color: #FFFFFF;
+        border-radius: 12px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        position: relative;
+    }
+    
+    .book-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0px 6px 12px rgba(60, 52, 52, 0.3);
+    }
+    
+    .book-card h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        margin-top: 5px;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .book-card p {
+        font-size: 0.9rem;
+        color: #CCCCCC;
+        margin: 4px 0;
+        flex-grow: 1;
+    }
+    
+    .book-card .content {
+        margin-bottom: 16px;
+    }
+    
+    .book-card form.info-form {
+        margin-bottom: 8px;
+    }
+    
+    .book-card .reserve-btn {
+        margin-top: auto;
+    }
+    @media (max-width: 600px) {
         .book-card {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .parent-container {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            width: 100%; 
-            max-width: 280px; 
-            height: 350px; 
-            padding: 20px;
-            background: #1E1E1E; 
-            color: #FFFFFF;
-            border-radius: 12px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
-            transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            position: relative;
+            align-items: center;
+        }
         }
 
-        .book-card h5 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            margin-top: 5px;
-            white-space: normal;
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Limits title to 2 lines */
-            line-clamp: 2; /* Limits title to 2 lines */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+    
+  
+    .hidden {
+        display: none !important;
+    }
+    
+    .book-card.show {
+        opacity: 1;
+        transform: scale(1);
+        height: auto;
+        margin: 15px;
+        transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
+    }
+    
+    .button-group {
+        margin-top: 25px;
+    }
+    .button-group button {
+        width: 100%; 
+        max-width: 250px;
         }
-
-        .book-card:hover {
-            transform: translateY(-1px); /* Slight lift on hover */
-            box-shadow: 0px 6px 12px rgba(60, 52, 52, 0.3);
-        }
-
-
-        .hidden {
-            display: none !important;
-        }
-
-        .book-card.show {
-            opacity: 1;
-            transform: scale(1);
-            height: auto;
-            margin: 15px;
-            transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
-        }
-
-        .book-card p {
-            font-size: 0.9rem;
-            color: #CCCCCC;
-            margin: 4px 0;
-            flex-grow: 1; /* Ensures descriptions take up space without breaking layout */
-        }
-
-        .reserve-btn {
-            margin-top: auto; /* Pushes button to bottom */
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 6px;
-            border: none;
-            transition: background-color 0.3s ease-in-out;
-            font-size: 0.9rem;
-        }
-
-        .reserve-btn:hover {
-            background-color: #0056b3;
-        }
-                
-        .navbar a {
-            color: #000000;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 8px 16px;
-            background-color: rgba(0, 0, 139, 0.6);
-            border-radius: 6px;
-            transition: background-color 0.3s, transform 0.3s; 
-        }
-
-        .navbar a:hover {
-            background-color: rgba(0, 0, 139, 0.8);
-            transform: scale(1.05);
-        }
-
-        .book-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .modal-body {
-            color: black; /* Change the text color inside the modal */
-        }
-
-        html, body {
-            overflow: auto; /* Allows scrolling */
-            -ms-overflow-style: none;  /* Hides scrollbar in IE/Edge */
-            scrollbar-width: none;  /* Hides scrollbar in Firefox */
-        }
-
-
-        body {
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* Internet Explorer */
-            overflow-y: scroll;
-        }
-
-
-        .floating-scrollbar {
-            position: fixed;
-            right: 50px; /* Moves it away from the edge */
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px; /* Width of the scrollbar */
-            height:85vh; /* Adjust height */
-            background: rgba(179, 179, 179, 0.563);
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            overflow: hidden;
-        }
-
-        .floating-thumb {
-            width: 100%;
-            overflow-y: auto;
-            height: 100%; /* Adjustable */
-            background: rgba(0, 0, 139, 0.6);
-            border-radius: 12px;
-            position: absolute;
-            top: 0;
-            cursor: grab;
-            transition: background 0.3s ease-in-out;
-        }
-
-        .floating-thumb:hover {
-            background: rgba(0, 0, 139, 0.8);
-        }
-
-
+    .book-info-btn{
+        background-color: #0056acd8;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        border: none;
+        transition: background-color 0.2s ease-in-out;
+        font-size: 0.9rem;
+    }
+    .book-info-btn:hover {
+        background-color: #004793d7;
+    }
+    .reserve-btn {
+        background-color: #0070e7c3;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        border: none;
+        transition: background-color 0.3s ease-in-out;
+        font-size: 0.9rem;
+    }
+    
+    .reserve-btn:hover {
+        background-color: #0061c9c2;
+    }
+    
+   
+    .navbar a {
+        color: #000000;
+        text-decoration: none;
+        font-size: 16px;
+        padding: 8px 16px;
+        background-color: rgba(0, 0, 139, 0.6);
+        border-radius: 6px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    
+    .navbar a:hover {
+        background-color: rgba(0, 0, 139, 0.8);
+        transform: scale(1.05);
+    }
+    
+    
+    .modal-body {
+        color: black;
+    }
+    
+    .modal-title {
+        color: #000 !important;
+    }
+    
+    
+    #search-box {
+        width: 100%;
+        max-width: 800px;
+        padding: 12px 16px;
+        font-size: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease-in-out;
+        outline: none;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    #search-box::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    #search-box:focus {
+        border-color: rgba(0, 123, 255, 0.6);
+        box-shadow: 0px 6px 12px rgba(0, 123, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    @media (max-width: 768px) {
         #search-box {
-            width: 100%;
-            max-width: 800px; /* Increased max width for larger screens */
-            padding: 12px 16px;
-            font-size: 18px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease-in-out;
-            outline: none;
-            display: block;
-            margin: 0 auto; /* Keeps it centered */
+            max-width: 90%;
+            font-size: 16px;
         }
-
-        #search-box::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+    }
+    
+    
+    .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 25px;
+        background-color: rgba(0, 0, 139, 0.6);
+        color: #E0DFCA;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    
+    .back-btn:hover {
+        background-color: rgba(0, 0, 139, 0.8);
+        transform: scale(1.05);
+    }
+    
+    .floating-scrollbar {
+        position: fixed;
+        right: 50px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 85vh;
+        background: rgba(179, 179, 179, 0.563);
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        z-index: 9999;
+        overflow: hidden;
+    }
+    
+    .floating-thumb {
+        width: 100%;
+        overflow-y: auto;
+        height: 100%;
+        background: rgba(0, 0, 139, 0.6);
+        border-radius: 12px;
+        position: absolute;
+        top: 0;
+        cursor: grab;
+        transition: background 0.3s ease-in-out;
+    }
+    
+    .floating-thumb:hover {
+        background: rgba(0, 0, 139, 0.8);
+    }
+    
+    @media (max-width: 768px) {
+        .floating-scrollbar {
+            display: none;
         }
+    }
+    
+    
+    .contributed {
+        position: relative;
+    }
+    
+    .star-badge {
+        font-size: 1.4rem;
+        color: gold;
+        position: absolute;
+        bottom: 95x;
+        right: 50%;
+        transform: translateX(50%);
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+    }
+    
+    .star-badge:hover {
+        transform: translateX(50%) scale(1.2);
+        color: #ffd700;
+    }
+    
+    .star-badge::after {
+        content: "Contributed by " attr(data-contributor);
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        border-radius: 6px;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    
+    .star-badge:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-3px);
+    }
+    
+    
+    .container h2 {
+        margin-top: 60px;
+    }
+    
 
-        #search-box:focus {
-            border-color: rgba(0, 123, 255, 0.6);
-            box-shadow: 0px 6px 12px rgba(0, 123, 255, 0.4);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        @media (max-width: 768px) {
-            #search-box {
-                max-width: 90%; /* Adjust width for smaller screens */
-                font-size: 16px;
-            }
-        }
-
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 25px;
-            background-color: rgba(0, 0, 139, 0.6);
-            color: #E0DFCA;
-            padding: 10px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .back-btn:hover {
-            background-color: rgba(0, 0, 139, 0.8);
-            transform: scale(1.05);
-        }
-
-
-        @media (max-width: 768px) {
-            .floating-scrollbar {
-                display: none;
-            }
-        }
-
-
-        @media (max-width: 576px) {
-            .book-grid {
-                grid-template-columns: 1fr; /* Single column on smaller screens */
-                gap: 10px;
-            }
-            .book-card {
-                width: 90%; /* Makes cards wider on small screens */
-                margin: auto;
-            }
-        }
-
-
-        .container h2 {
-            margin-top: 60px; /* Add margin to prevent overlap */
-        }
-        
-        .modal-title {
-            color: #000 !important; /* Set modal title color to black */
-        }
-        .heading {
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-align: center;
-            color: #f5f5f5;
-            margin-bottom: 20px;
-            opacity: 1;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .scrolled .heading {
-            opacity: 0;
-        }
-
-        .contributed {
-            position: relative; /* Ensure proper placement */
-        }
-
-        .star-badge {
-            font-size: 1.4rem;
-            color: gold;
-            position: absolute;
-            bottom: 80px;
-            right: 50%;
-            transform: translateX(50%);
-            cursor: pointer;
-            transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
-        }
-
-        
-        .star-badge:hover {
-            transform: translateX(50%) scale(1.2); 
-            color: #ffd700; 
-        }
-
-        
-        .star-badge::after {
-            content: "Contributed by " attr(data-contributor);
-            position: absolute;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 6px 10px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            border-radius: 6px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-
-        .star-badge:hover::after {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(-3px); 
-        }
-
+    .popup-message {
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
     </style>
 </head>
 <body>
@@ -334,25 +371,38 @@
             {% for book in results %}
             <div class="book-card fade-in">
                 <div class="content">
-                    <h5>{{ book.bk_name }}</h5> <!-- Book Name -->
-                    <p><strong>Author:</strong> {{ book.author_name }}</p> 
-                    <p><strong>Book ID:</strong> {{ book.bk_id }}</p> 
+                    <h5>{{ book.bk_name }}</h5>
+                    <p><strong>Author:</strong> {{ book.author_name }}</p>
+                    <p><strong>Book ID:</strong> {{ book.bk_id }}</p>
                     <p><strong>Status:</strong> {{ book.bk_status }}</p>
                     <p><strong>Shelf No.:</strong> {{ book.shelf_no }}</p>
                     <p><strong>Rack No.:</strong> {{ book.rack_no }}</p>
                     {% if book.contributed == 'YES' %}
                         <span class="star-badge" data-contributor="{{ book.contributor }}">⭐</span>
-                    {% endif %} 
+                    {% endif %}
                 </div>
-                <button type="button" class="btn btn-primary reserve-btn"
-                        data-book-id="{{ book.bk_id }}" 
-                        data-book-name="{{ book.bk_name }}">Reserve
-                </button>
+            
+
+                <div class="button-group">
+                    <form class="info-form">
+                        <input type="hidden" name="bk_name" value="{{ book.bk_name }}">
+                        <input type="hidden" name="author_name" value="{{ book.author_name }}">
+                        <button type="submit" class="btn btn-primary book-info-btn">Generate Book Info 
+                            <span class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </form>
+            
+                    <button type="button" class="btn btn-primary reserve-btn"
+                            data-book-id="{{ book.bk_id }}"
+                            data-book-name="{{ book.bk_name }}">Reserve
+                    </button>
+                </div>
             </div>
+            
             {% endfor %}
         </div>
-
     </div>
+    
     
     <div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -385,13 +435,13 @@
         document.addEventListener("DOMContentLoaded", () => {
             const scrollbar = document.createElement("div");
             scrollbar.className = "floating-scrollbar";
-
+        
             const thumb = document.createElement("div");
             thumb.className = "floating-thumb";
-
+        
             scrollbar.appendChild(thumb);
             document.body.appendChild(scrollbar);
-
+        
             const updateScrollbar = () => {
                 const sh = document.documentElement.scrollHeight - window.innerHeight;
                 const th = scrollbar.clientHeight * (window.innerHeight / document.documentElement.scrollHeight);
@@ -399,10 +449,10 @@
                 thumb.style.height = `${th}px`;
                 thumb.style.top = `${(st / sh) * (scrollbar.clientHeight - th)}px`;
             };
-
+        
             window.addEventListener("scroll", updateScrollbar);
             updateScrollbar();
-
+        
             let isDragging = false, startY, startTop;
             thumb.onmousedown = e => {
                 isDragging = true;
@@ -410,7 +460,7 @@
                 startTop = parseFloat(thumb.style.top);
                 document.body.style.userSelect = "none";
             };
-
+        
             document.onmousemove = e => {
                 if (!isDragging) return;
                 const dy = e.clientY - startY;
@@ -419,18 +469,16 @@
                 const newTop = Math.min(maxTop, Math.max(0, startTop + dy));
                 window.scrollTo(0, (newTop / maxTop) * sh);
             };
-
+        
             document.onmouseup = () => {
                 isDragging = false;
                 document.body.style.userSelect = "";
             };
         });
-
-
+        
         $(document).ready(function () {
-            $('#search-box').focus(); // Automatically focus on search box
-        });
-        $(document).ready(function () {
+            $('#search-box').focus();
+        
             $('#search-box').on('keyup', function () {
                 var searchQuery = $(this).val().toLowerCase();
                 $('.book-card').each(function () {
@@ -442,7 +490,7 @@
                     }
                 });
             });
-
+        
             $('.reserve-btn').on('click', function () {
                 var bookId = $(this).data('book-id');
                 $('#bookIdInput').val(bookId);
@@ -451,8 +499,169 @@
                 $('#reserveModal').modal('show');
             });
         });
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            const forms = document.querySelectorAll('.info-form');
+        
+            forms.forEach(function (form) {
+                bindFormSubmit(form);
+            });
+        
+            function bindFormSubmit(form) {
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton && !submitButton.querySelector('.custom-spinner')) {
+                    const spinner = document.createElement('span');
+                    spinner.className = 'custom-spinner d-none';
+                    spinner.style.width = '14px';
+                    spinner.style.height = '14px';
+                    spinner.style.border = '2px solid white';
+                    spinner.style.borderTop = '2px solid transparent';
+                    spinner.style.borderRadius = '50%';
+                    spinner.style.display = 'inline-block';
+                    spinner.style.marginLeft = '8px';
+                    spinner.style.animation = 'spin 0.6s linear infinite';
+                    submitButton.appendChild(spinner);
+                }
+        
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+        
+                    const spinner = submitButton.querySelector('.custom-spinner');
+                    spinner.classList.remove('d-none');
+                    submitButton.disabled = true;
+        
+                    const formData = new FormData(form);
+        
+                    fetch('/reserve', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(message => {
+                        spinner.classList.add('d-none');
+                        submitButton.disabled = false;
+        
+                        const card = form.closest('.book-card');
+                        const originalContent = card.innerHTML;
+                        card.dataset.originalContent = originalContent;
+                        card.innerHTML = '';
+        
+                        const popup = document.createElement('div');
+                        popup.style.position = 'absolute';
+                        popup.style.top = '0';
+                        popup.style.left = '0';
+                        popup.style.width = '100%';
+                        popup.style.height = '100%';
+                        popup.style.background = 'rgba(29, 31, 31, 0.9)';
+                        popup.style.border = '1px solid #ccc';
+                        popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                        popup.style.zIndex = 10;
+                        popup.style.display = 'flex';
+                        popup.style.flexDirection = 'column';
+                        popup.style.justifyContent = 'center';
+                        popup.style.alignItems = 'center';
+                        popup.style.borderRadius = '4px';
+                        popup.style.overflow = 'hidden';
+                        popup.style.padding = '10px';
+        
+                        const closeButton = document.createElement('span');
+                        closeButton.innerHTML = '&times;';
+                        closeButton.style.position = 'absolute';
+                        closeButton.style.top = '10px';
+                        closeButton.style.right = '18px';
+                        closeButton.style.cursor = 'pointer';
+                        closeButton.style.fontSize = '24px';
+                        closeButton.style.fontWeight = 'bold';
+                        closeButton.style.color = '#fff';
+        
+                        closeButton.addEventListener('click', function () {
+                            card.innerHTML = card.dataset.originalContent;
+        
+                            const reserveButton = card.querySelector('.reserve-btn');
+                            if (reserveButton) {
+                                reserveButton.addEventListener('click', function () {
+                                    const bookId = this.dataset.bookId;
+                                    document.getElementById('bookIdInput').value = bookId;
+                                    const bookName = this.dataset.bookName;
+                                    document.getElementById('bookNameDisplay').textContent = bookName;
+                                    $('#reserveModal').modal('show');
+                                });
+                            }
+        
+                            const restoredForm = card.querySelector('.info-form');
+                            if (restoredForm) {
+                                bindFormSubmit(restoredForm);
+                            }
+                        });
+        
+                        const messageContent = document.createElement('div');
+                        messageContent.classList.add('popup-message-content');
+                        messageContent.style.whiteSpace = 'pre-wrap';
+                        messageContent.style.maxHeight = '100%';
+                        messageContent.style.overflowY = 'auto';
+                        messageContent.style.width = '100%';
+                        messageContent.style.fontSize = '15px';
+                        messageContent.style.lineHeight = '1.5';
+                        messageContent.style.textAlign = 'left';
+                        messageContent.style.color = '#fff';
+                        messageContent.style.margin = '0';
+                        messageContent.style.padding = '0 10px';
+                        messageContent.textContent = message;
+                        messageContent.style.fontFamily = "Roboto Mono";
+                        messageContent.style.fontStyle = 'Regular';
+                        messageContent.style.fontWeight = '350';
+        
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .popup-message-content::-webkit-scrollbar {
+                                width: 6px;
+                            }
+        
+                            .popup-message-content::-webkit-scrollbar-track {
+                                background: #222;
+                            }
+        
+                            .popup-message-content::-webkit-scrollbar-thumb {
+                                background-color: #888;
+                                border-radius: 3px;
+                                min-height: 30px;
+                            }
+        
+                            .popup-message-content::-webkit-scrollbar-button {
+                                display: none;
+                            }
+        
+                            .popup-message-content::-webkit-scrollbar-thumb:hover {
+                                background: #555;
+                            }
+        
+                            .popup-message-content {
+                                scrollbar-width: thin;
+                                scrollbar-color: #888 #222;
+                            }
+        
+                            @keyframes spin {
+                                to { transform: rotate(360deg); }
+                            }
+                        `;
+                        document.head.appendChild(style);
+        
+                        popup.appendChild(closeButton);
+                        popup.appendChild(messageContent);
+                        card.style.position = 'relative';
+                        card.appendChild(popup);
+                    })
+                    .catch(error => {
+                        spinner.classList.add('d-none');
+                        submitButton.disabled = false;
+                        alert('Error: ' + error);
+                    });
+                });
+            }
+        });
+        </script>
+        
 
-    </script>
     
 </body>
 </html>

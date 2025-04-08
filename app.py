@@ -15,7 +15,6 @@ database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
 redis_pass = os.getenv("REDIS_PASS")
 
-# Initialize Redis for IP tracking
 redis_client = redis.Redis(
     host='redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com',
     port=11307,
@@ -172,7 +171,6 @@ def result():
                     "contributor": contributor
                 })
 
-        # Generate AI response about the book and the author regardless of book presence
         response = model.generate_content(
                 f"""
                     You are a helpful assistant for a library app.
@@ -273,10 +271,9 @@ def contribution():
 
     return render_template('contribute.html')
 
-@app.route('/reserve', methods=['GET', 'POST'])
+@app.route('/reserve', methods=['GET','POST'])
 
 def reserve_book():
-    # Initialize the db connection and cursor outside of the method block
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
     results=[]
@@ -302,65 +299,97 @@ def reserve_book():
             return render_template('reserve.html', results=results)
 
         except Exception as e:
-            # Log the error and return a message to the user
             app.logger.error(f"Error during database fetch: {e}")
             return "Error fetching books", 500
+    
 
     if request.method == 'POST':
         try:
-            book_id = request.form.get('book_id').strip()
-            user_name = request.form.get('user_name').strip()
-            contact = request.form.get('contact').strip()
-            card_id = request.form.get('card_id').strip()  # Card ID to identify the user
+            genai.configure(api_key=api_key)
+            if request.form.get('bk_name') and request.form.get('author_name'):
+                book = request.form.get('bk_name')
+                author = request.form.get('author_name')
+                model = genai.GenerativeModel("gemini-2.0-flash-lite")
+                response = model.generate_content(
+                    f"""Provide detailed and structured information about the book "{book}" by {author}. 
+                        Do not write any introduction or conclusion. Use bullet points under each heading. 
+                        If any section is not applicable to the book, skip it without mentioning that it's skipped. 
+                        Follow this exact format:
 
-            # Check if the user exists in the user_data database
-            query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""
-            cursor.execute(query, (card_id,))
-            user = cursor.fetchone()
-
-            if user:
-                # Check the count of books already reserved by the user
-                query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
-                cursor.execute(query, (card_id,))
-                reserved_count = cursor.fetchone()[0]
-
-                if reserved_count >= 1:
-                    message = "Reservation not confirmed. You have already reserved 1 books, which is the maximum limit."
-                else:
-                    # Check if the book is available
-                    query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
-                    cursor.execute(query, (book_id,))
-                    book = cursor.fetchone()
-
-                    if book:
-                        bk_name, bk_status = book
-                        if bk_status == "Available":
-                            # Update book status to "Reserved" and set the user CARD_ID
-                            query = '''
-                                    UPDATE "library" 
-                                    SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s
-                                    WHERE "BK_ID" = %s;
-                                    '''
-                            cursor.execute(query, (int(card_id), book_id)) 
-                            #cursor.execute(query)
-                            db_connection.commit()
-                            message = f"The book '{bk_name}' has been reserved successfully!"
-                        else:
-                            message = f"Sorry, the book '{bk_name}' is currently not available."
-                    else:
-                        message = "Book ID not found. Please check and try again."
-            else:
-                message = (
-                    "Reservation not confirmed. You are not an existing member of BEN Library. "
-                    "To become a member, borrow your first book directly from the library."
+                        Title: [Book Title]
+                        Author: [Author Name]
+                        Type: [e.g., Novel, Biography, Academic, Technical, etc.]
+                        Genre: [e.g., Fiction, Non-Fiction, Mystery, etc.]
+                                                                                     
+                        Description: [Brief and informative description of the book]
+                                                                                     
+                        [Main Topics / Themes]:
+                        - [Bullet point 1]
+                        - [Bullet point 2]
+                                                                                       
+                        [Key Points / Learnings]:
+                        - [Bullet point 1]
+                        - [Bullet point 2]
+                                                                                           
+                        Author Background:
+                        - [Bullet point about the author's background]
+                        - [Bullet point about notable achievements]
+                                                                                                                    
+                        Only provide these headings and bullet points. Do not add any other text or explanation. """
                 )
+                        
+                message=response.text.replace('*','').replace('**','')
+                return message
+            
+            elif request.form.get('book_id') and request.form.get('card_id') :
+                book_id = request.form.get('book_id').strip()
+                #user_name = request.form.get('user_name').strip()
+                #contact = request.form.get('contact').strip()
+                card_id = request.form.get('card_id').strip()  # Card ID to identify the user
+                #check for user info
+                query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""
+                cursor.execute(query, (card_id,))
+                user = cursor.fetchone()
+
+                if user:
+                    query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
+                    cursor.execute(query, (card_id,))
+                    reserved_count = cursor.fetchone()[0]
+
+                    if reserved_count >= 1:
+                        message = "Reservation not confirmed. You have already reserved 1 books, which is the maximum limit."
+                    else:
+                        query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
+                        cursor.execute(query, (book_id,))
+                        book = cursor.fetchone()
+
+                        if book:
+                            bk_name, bk_status = book
+                            if bk_status == "Available":
+                                query = '''
+                                        UPDATE "library" 
+                                        SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s
+                                        WHERE "BK_ID" = %s;
+                                        '''
+                                cursor.execute(query, (int(card_id), book_id)) 
+                                #cursor.execute(query)
+                                db_connection.commit()
+                                message = f"The book '{bk_name}' has been reserved successfully!"
+                            else:
+                                message = f"Sorry, the book '{bk_name}' is currently not available."
+                        else:
+                            message = "Book ID not found. Please check and try again."
+                else:
+                    message = (
+                        "Reservation not confirmed. You are not an existing member of BEN Library. "
+                        "To become a member, borrow your first book directly from the library."
+                    )
 
         except Exception as e:
             # Log the error during POST and return a message to the user
             app.logger.error(f"Error during reservation process: {e}")
             message = "An error occurred while processing your reservation."
 
-        # Close the database connection and cursor after handling POST request
         cursor.close()
         db_connection.close()
 
