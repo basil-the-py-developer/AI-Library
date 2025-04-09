@@ -254,8 +254,8 @@
         position: absolute;
         top: 20px;
         left: 25px;
-        background-color: rgba(0, 0, 139, 0.6);
-        color: #E0DFCA;
+        background-color: rgba(0, 0, 145, 0.7);
+        color: #ffffff;
         padding: 10px 16px;
         border-radius: 6px;
         text-decoration: none;
@@ -263,7 +263,7 @@
     }
     
     .back-btn:hover {
-        background-color: rgba(0, 0, 139, 0.8);
+        background-color: rgba(0, 0, 145, 0.8);
         transform: scale(1.05);
     }
     
@@ -362,7 +362,7 @@
     </style>
 </head>
 <body>
-    <a href="/" class="back-btn">Back to Search</a>
+    <a href="/" class="back-btn" style="font-weight: 550;">Back to Search</a>
     <div class="container mt-5">
         <h2 class="text-center heading">Available Books</h2>
         <input type="text" id="search-box" class="form-control my-4" placeholder="Search for a book..." />
@@ -501,12 +501,48 @@
         });
         
         document.addEventListener('DOMContentLoaded', function () {
+            //inject the anim immediately when the DOM is loaded
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                .popup-message-content::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .popup-message-content::-webkit-scrollbar-track {
+                    background: #222;
+                }
+
+                .popup-message-content::-webkit-scrollbar-thumb {
+                    background-color: #888;
+                    border-radius: 3px;
+                    min-height: 30px;
+                }
+
+                .popup-message-content::-webkit-scrollbar-button {
+                    display: none;
+                }
+
+                .popup-message-content::-webkit-scrollbar-thumb:hover {
+                    background: #555;
+                }
+
+                .popup-message-content {
+                    scrollbar-width: thin;
+                    scrollbar-color: #888 #222;
+                }
+            `;
+            document.head.appendChild(style);
+
             const forms = document.querySelectorAll('.info-form');
-        
+
             forms.forEach(function (form) {
                 bindFormSubmit(form);
             });
-        
+
             function bindFormSubmit(form) {
                 const submitButton = form.querySelector('button[type="submit"]');
                 if (submitButton && !submitButton.querySelector('.custom-spinner')) {
@@ -522,16 +558,16 @@
                     spinner.style.animation = 'spin 0.6s linear infinite';
                     submitButton.appendChild(spinner);
                 }
-        
+
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
-        
+
                     const spinner = submitButton.querySelector('.custom-spinner');
                     spinner.classList.remove('d-none');
                     submitButton.disabled = true;
-        
+
                     const formData = new FormData(form);
-        
+
                     fetch('/reserve', {
                         method: 'POST',
                         body: formData
@@ -540,12 +576,12 @@
                     .then(message => {
                         spinner.classList.add('d-none');
                         submitButton.disabled = false;
-        
+
                         const card = form.closest('.book-card');
                         const originalContent = card.innerHTML;
                         card.dataset.originalContent = originalContent;
                         card.innerHTML = '';
-        
+
                         const popup = document.createElement('div');
                         popup.style.position = 'absolute';
                         popup.style.top = '0';
@@ -563,7 +599,7 @@
                         popup.style.borderRadius = '4px';
                         popup.style.overflow = 'hidden';
                         popup.style.padding = '10px';
-        
+
                         const closeButton = document.createElement('span');
                         closeButton.innerHTML = '&times;';
                         closeButton.style.position = 'absolute';
@@ -573,10 +609,10 @@
                         closeButton.style.fontSize = '24px';
                         closeButton.style.fontWeight = 'bold';
                         closeButton.style.color = '#fff';
-        
+
                         closeButton.addEventListener('click', function () {
                             card.innerHTML = card.dataset.originalContent;
-        
+
                             const reserveButton = card.querySelector('.reserve-btn');
                             if (reserveButton) {
                                 reserveButton.addEventListener('click', function () {
@@ -587,65 +623,30 @@
                                     $('#reserveModal').modal('show');
                                 });
                             }
-        
+
                             const restoredForm = card.querySelector('.info-form');
                             if (restoredForm) {
                                 bindFormSubmit(restoredForm);
                             }
                         });
-        
+
                         const messageContent = document.createElement('div');
                         messageContent.classList.add('popup-message-content');
                         messageContent.style.whiteSpace = 'pre-wrap';
                         messageContent.style.maxHeight = '100%';
                         messageContent.style.overflowY = 'auto';
                         messageContent.style.width = '100%';
-                        messageContent.style.fontSize = '15px';
+                        messageContent.style.fontSize = '14px';
                         messageContent.style.lineHeight = '1.5';
                         messageContent.style.textAlign = 'left';
                         messageContent.style.color = '#fff';
                         messageContent.style.margin = '0';
                         messageContent.style.padding = '0 10px';
                         messageContent.textContent = message;
-                        messageContent.style.fontFamily = "Roboto Mono";
+                        messageContent.style.fontFamily = "Fira Code, monospace";
                         messageContent.style.fontStyle = 'Regular';
-                        messageContent.style.fontWeight = '350';
-        
-                        const style = document.createElement('style');
-                        style.textContent = `
-                            .popup-message-content::-webkit-scrollbar {
-                                width: 6px;
-                            }
-        
-                            .popup-message-content::-webkit-scrollbar-track {
-                                background: #222;
-                            }
-        
-                            .popup-message-content::-webkit-scrollbar-thumb {
-                                background-color: #888;
-                                border-radius: 3px;
-                                min-height: 30px;
-                            }
-        
-                            .popup-message-content::-webkit-scrollbar-button {
-                                display: none;
-                            }
-        
-                            .popup-message-content::-webkit-scrollbar-thumb:hover {
-                                background: #555;
-                            }
-        
-                            .popup-message-content {
-                                scrollbar-width: thin;
-                                scrollbar-color: #888 #222;
-                            }
-        
-                            @keyframes spin {
-                                to { transform: rotate(360deg); }
-                            }
-                        `;
-                        document.head.appendChild(style);
-        
+                        messageContent.style.fontWeight = '400';
+
                         popup.appendChild(closeButton);
                         popup.appendChild(messageContent);
                         card.style.position = 'relative';
@@ -659,6 +660,7 @@
                 });
             }
         });
+
         </script>
         
 

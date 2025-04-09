@@ -324,21 +324,21 @@ def reserve_book():
                         Description: [Brief and informative description of the book]
                                                                                      
                         [Main Topics / Themes]:
-                        - [Bullet point 1]
-                        - [Bullet point 2]
+                        - [point 1]
+                        - [point 2]
                                                                                        
                         [Key Points / Learnings]:
-                        - [Bullet point 1]
-                        - [Bullet point 2]
+                        - [point 1]
+                        - [point 2]
                                                                                            
                         Author Background:
-                        - [Bullet point about the author's background]
-                        - [Bullet point about notable achievements]
+                        - [point about the author's background]
+                        - [point about notable achievements]
                                                                                                                     
                         Only provide these headings and bullet points. Do not add any other text or explanation. """
                 )
                         
-                message=response.text.replace('*','').replace('**','')
+                message=response.text.replace('***','').replace('**','')
                 return message
             
             elif request.form.get('book_id') and request.form.get('card_id') :
