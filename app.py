@@ -26,7 +26,8 @@ redis_client = redis.Redis(
 # Set up rate limiter
 limiter = Limiter(
     get_remote_address,
-    app=app,   
+    app=app,
+    storage_uri=f"redis://default:{redis_pass}@redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com:11307"
 )
 
 def get_geolocation(ip):
