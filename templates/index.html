@@ -1,489 +1,457 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benhill School's AI Integrated Student Book Guide</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <script src="/_vercel/insights/script.js" async></script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
-
-    <style>
-         body {
-            background: linear-gradient(to right, violet, pink); /* Initial gradient background */
-            color: #E0DFCA; /* Text color */
-            font-family: 'Roboto', sans-serif; /* Font from Google Fonts */
-            display: flex; /* Flexbox for centering */
-            flex-direction: column; /* Column layout for content and footer */
-            justify-content: space-between; /* Push footer to the bottom */
-            min-height: 100vh; /* Full viewport height */
-            margin: 0; /* Remove default margin */
-            overflow-y: auto; /* Enable vertical scrolling when content overflows */
-            position: relative; /* For absolute positioning of the gradient effect */
-        }
-
-        /* Gradient effect with animation */
-        .gradient-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-            z-index: 0;
-        }
-
-        @keyframes gradientAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        /* Watermark background */
-        .watermark {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 600px; /* Adjust size */
-            height: 600px;
-            background-image: url("{{ url_for('static', filename='lol.png') }}");
-            background-size: cover; /* Ensure it fills the size */
-            background-repeat: no-repeat; /* No tiling */
-            background-position: center; /* Center alignment */
-            opacity: .5; /* Subtle transparency */
-            pointer-events: none; /* Make it non-interactive */
-            transform: translate(-50%, -100%); /* Center the watermark */
-            z-index: 3; /* Behind all content */
-        }
-        .btn-custom {
-            display: inline-block;
-            padding: 10px 16px;
-            background-color: rgba(0, 0, 145, 0.7);
-            border-radius: 6px;
-            color: #ffffff;
-            text-align: center;
-            font-size: 16px;
-            text-decoration: none;
-            transition: background-color 0.3s, transform 0.3s;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-custom:hover {
-            background-color: rgba(0, 0, 145, 0.8);
-            transform: scale(1.05);
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-        /* Container styles */
-        .container {
-            background-color: rgba(18, 18, 18, 0.8); /* Dark background with transparency */
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow for depth */
-            width: 100%; /* Full width for responsiveness */
-            max-width: 600px; /* Maximum width for the container */
-            position: relative; /* Relative positioning to bring it above the gradient */
-            z-index: 1; /* Bring the container above the watermark */
-            max-height: 80vh; /* Limit the height */
-            overflow-y: auto; /* Enable scrolling if content exceeds max height */
-        }
-
-        h1 {
-            font-family: 'Poppins', sans-serif; /* Different font for heading */
-            color: #ffffff; /* White color for the heading */
-        }
-
-        .btn-primary {
-            background-color: #007bff; /* Bootstrap primary button color */
-            border: none; /* Remove border */
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3; /* Darker blue on hover */
-        }
-
-        .footer {
-            background-color: #282828; /* Dark footer background */
-            color: #E0DFCA; /* Light text color */
-            font-size: 0.9rem;
-            border-top: 1px solid #444;
-            width: 100%; /* Full width across the page */
-            text-align: center; /* Center the footer text */
-        }
-
-        .footer a {
-            color: #FFD700; /* Gold for links */
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .footer p {
-            margin: 5px 0;
-        }
-
-        /* Navigation bar styles */
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            padding: 0 20px;
-            z-index: 10;
-        }
-        
-        .btn-custom {
-            font-weight: 450;
-            padding: 10px 16px;
-            background-color: #0066cc;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        
-        .btn-custom:hover {
-            background-color: #0055aa;
-            transform: scale(1.05);
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .nav-buttons {
-                flex-direction: column;
-                align-items: center;
-                top: 10px;
-                padding: 0 10px;
-            }
-        
-            .btn-custom {
-                width: 100%;
-                text-align: center;
-                margin-bottom: 10px;
-            }
-        
-            .btn-custom:last-child {
-                margin-bottom: 0;
-            }
-        }
-
-
-        html {
-            scroll-behavior: smooth; /* Enable smooth scrolling */
-        }
-     
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-            margin-left: 15px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 34px;
-        }
-
-        .slider::before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #007bff;
-        }
-
-        input:checked + .slider::before {
-            transform: translateX(24px);
-        }
-
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round::before {
-            border-radius: 50%;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            position: absolute;
-            top: 15px;
-            left: 0;
-            right: 0;
-            padding: 0 20px;
-        }
-
-        .text-center.py-3 {
-            text-align: center;
-            padding: 1rem 0;
-        }
-        
-        .toggle-right {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .toggle-card {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 5px 10px; /* Further reduced padding */
-            border-radius: 8px;
-            margin-bottom: 10px; /* Adjust spacing */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #toggleStatusBox {
-            max-width: 470px;
-            padding: 6px 10px;
-            font-size: 12px;
-            line-height: 1.4;
-            text-align: left;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            right: 2px;
-            transition: background-color 0.4s ease;
-        }
-
-        #toggleStatus {
-            font-size: 12px; /* Smaller font */
-            display: block;
-            white-space: normal; /* Allow text wrapping */
-        }
-
-        .blue-bg {
-            background-color: rgba(0, 123, 255, 0.2);
-            color: #cce6ff;
-        }
-
-        .green-bg {
-            background-color: rgba(40, 167, 69, 0.2);
-            color: #d4f8dd;
-        }
-
-        #toggleStatusBox span {
-            font-size: 13px; 
-        }
-
-
-        .switch .slider {
-            background-color: rgba(72, 201, 120, 0.4);
-        }
-
-        .switch input:checked + .slider {
-            background-color: rgba(18, 133, 255, 0.544); /* Transparent dark blue */
-        }
-
-        .slider::before {
-            background-color: white;
-        }
-        @media (max-width: 576px) {
-            .container {
-                padding: 30px;
-                margin-top: 55px;
-                
-            }
-            .footer-container {
-                margin-top: 20px;
-            }
-
-            .toggle-right {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .switch {
-                margin-bottom: 10px;
-                margin-left: 0;
-            }
-
-            #toggleStatusBox {
-                width: 100%;
-                max-width: 510px;
-                font-size: 13px;
-                padding: 7px;
-                right: 0px;
-            }
-
-            .toggle-card {
-                padding: 10px;
-            }
-        }
-        @media (max-width: 400px) {
-            .switch {
-                width: 45px;
-                height: 24px;
-            }
-
-            .switch .slider::before {
-                height: 20px;
-                width: 20px;
-            }
-        }
-        .highlight {
-            background-color: rgba(255, 230, 0, 0.4); /* Light yellow background */
-            padding: 2px 4px;
-            border-radius: 4px;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="gradient-effect"></div> <!-- Gradient effect layer -->
-
-
-    <nav class="navbar navbar-expand-lg navbar-dark"></nav>
-
-<div class="nav-buttons">
-    <a href="/contribute" class="btn-custom">Contribute a Book</a>
-    <a href="/reserve" class="btn-custom">Browse All Books</a>
-</div>
-
-    <div class="container mt-6">
-        <h1>AI Integrated Student Book Guide</h1>
-        <form method="POST" class="mt-4">
-            <div class="form-group">
-                <label for="search_type">Select Search Type:</label>
-                <select class="form-control" id="search_type" name="search_type">
-                    <option value="Search by Book">Search by Book</option>
-                    <option value="Search by Author">Search by Author</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="search_input">Enter Author/Book Name:</label>
-                <input type="text" class="form-control" id="search_input" name="search_input" required>
-            </div>
-
-            <!-- Toggle card with switch and status inside -->
-            <div class="toggle-card">
-                <div class="toggle-right">
-                    <label class="switch">
-                        <input type="checkbox" name="sw_value" id="aiToggle" value="true">
-                        <span class="slider round"></span>
-                    </label>
-                    <div id="toggleStatusBox" class="green-bg"></div>
-                    
-                </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-block mt-3">Search</button>
-        </form>
-    </div>
-
-    <div class="container text-center py-3 footer-container">
-        <footer class="site-footer">
-            <div class="footer-content">
-              <p>Presented by Class XII Batch 2024–25<br>
-                Developed by 
-                <a href="https://github.com/basil-the-py-developer" target="_blank">Basil</a> and 
-                <a href="https://github.com/aviyall" target="_blank">Avneeth</a>
-              </p>
-              <p>
-                In collaboration with B Grid Technologies <br>
-                <a href="https://basil-the-py-developer.github.io/portfolio" target="_blank">Portfolio</a> |
-                <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank">LinkedIn</a> |
-                <a href="https://github.com/basil-the-py-developer/AI-Library" target="_blank">GitHub Repo</a>
-              </p>
-            </div>
-          </footer>
-          
-              
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const toggle = document.getElementById("aiToggle");
-            const statusBox = document.getElementById("toggleStatusBox");
-            const slider = document.querySelector(".slider");
-
-            function updateStatusBox(isChecked) {
-                const isMobile = window.matchMedia("(max-width: 576px)").matches;
-
-                if (isChecked) {
-                    statusBox.classList.remove("green-bg");
-                    statusBox.classList.add("blue-bg");
-                    statusBox.innerHTML = isMobile
-                        ? `<span class="line"><span class="highlight">Detailed Info Mode:</span> Slower, yet precise and</span><br>
-                        <span class="line">in-depth. Ideal for infamous books, deep insights</span><br>
-                        <span class="line">and comprehensive coverage.</span>`
-                        : `<span class="line"><span class="highlight">Detailed Info Mode:</span> Slower, yet precise and in-depth. Ideal for infamous     </span><br>
-                        <span class="line">books deep insights and comprehensive coverage.</span>`;
-                    slider.style.backgroundColor = "rgba(18, 133, 255, 0.544)";
-                } else {
-                    statusBox.classList.remove("blue-bg");
-                    statusBox.classList.add("green-bg");
-                    statusBox.innerHTML = isMobile
-                        ? `<span class="line"><span class="highlight">Quick Info Mode:</span> Gives fast, clear summaries</span><br>
-                        <span class="line">for well-known books. May not cover obscure or</span><br>
-                        <span class="line">infamous titles because of limited data coverage.</span>`
-                        : `<span class="line"><span class="highlight">Quick Info Mode:</span> Gives fast, clear summaries for well-known books. But</span><br>
-                        <span class="line">may not cover obscure or infamous titles because of limited data coverage.</span>`;
-                    slider.style.backgroundColor = "rgba(72, 201, 120, 0.4)";
-                }
-            }
-
-            // Initial setup
-            updateStatusBox(toggle.checked);
-
-            // Toggle event listener
-            toggle.addEventListener("change", function () {
-                updateStatusBox(this.checked);
-            });
-
-            // Update on screen resize to stay responsive
-            window.addEventListener("resize", function () {
-                updateStatusBox(toggle.checked);
-            });
-        });
-
-
-
-    </script>
-
-</body>
-</html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Benhill School's AI Integrated Student Book Guide</title>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+     <script src="/_vercel/insights/script.js" async></script>
+     <script defer src="/_vercel/speed-insights/script.js"></script>
+ 
+     <style>
+          body {
+             background: linear-gradient(to right, violet, pink); /* Initial gradient background */
+             color: #E0DFCA; /* Text color */
+             font-family: 'Roboto', sans-serif; /* Font from Google Fonts */
+             display: flex; /* Flexbox for centering */
+             flex-direction: column; /* Column layout for content and footer */
+             justify-content: space-between; /* Push footer to the bottom */
+             min-height: 100vh; /* Full viewport height */
+             margin: 0; /* Remove default margin */
+             overflow-y: auto; /* Enable vertical scrolling when content overflows */
+             position: relative; /* For absolute positioning of the gradient effect */
+         }
+ 
+         /* Gradient effect with animation */
+         .gradient-effect {
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
+             background-size: 400% 400%;
+             animation: gradientAnimation 10s ease infinite;
+             z-index: 0;
+         }
+ 
+         @keyframes gradientAnimation {
+             0% {
+                 background-position: 0% 50%;
+             }
+             50% {
+                 background-position: 100% 50%;
+             }
+             100% {
+                 background-position: 0% 50%;
+             }
+         }
+ 
+         /* Watermark background */
+         .watermark {
+             position: fixed;
+             top: 50%;
+             left: 50%;
+             width: 600px; /* Adjust size */
+             height: 600px;
+             background-image: url("{{ url_for('static', filename='lol.png') }}");
+             background-size: cover; /* Ensure it fills the size */
+             background-repeat: no-repeat; /* No tiling */
+             background-position: center; /* Center alignment */
+             opacity: .5; /* Subtle transparency */
+             pointer-events: none; /* Make it non-interactive */
+             transform: translate(-50%, -100%); /* Center the watermark */
+             z-index: 3; /* Behind all content */
+         }
+         .btn-custom {
+             display: inline-block;
+             padding: 10px 16px;
+             background-color: rgba(0, 0, 145, 0.7);
+             border-radius: 6px;
+             color: #ffffff;
+             text-align: center;
+             font-size: 16px;
+             text-decoration: none;
+             transition: background-color 0.3s, transform 0.3s;
+             border: none;
+             cursor: pointer;
+             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+         }
+ 
+         .btn-custom:hover {
+             background-color: rgba(0, 0, 145, 0.8);
+             transform: scale(1.05);
+             color: #ffffff;
+             text-decoration: none;
+         }
+ 
+         /* Container styles */
+         .container {
+             background-color: rgba(18, 18, 18, 0.8); /* Dark background with transparency */
+             padding: 30px;
+             border-radius: 12px;
+             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Shadow for depth */
+             width: 100%; /* Full width for responsiveness */
+             max-width: 600px; /* Maximum width for the container */
+             position: relative; /* Relative positioning to bring it above the gradient */
+             z-index: 1; /* Bring the container above the watermark */
+             max-height: 80vh; /* Limit the height */
+             overflow-y: auto; /* Enable scrolling if content exceeds max height */
+         }
+ 
+         h1 {
+             font-family: 'Poppins', sans-serif; /* Different font for heading */
+             color: #ffffff; /* White color for the heading */
+         }
+ 
+         .btn-primary {
+             background-color: #007bff; /* Bootstrap primary button color */
+             border: none; /* Remove border */
+         }
+ 
+         .btn-primary:hover {
+             background-color: #0056b3; /* Darker blue on hover */
+         }
+ 
+         .footer {
+             background-color: #282828; /* Dark footer background */
+             color: #E0DFCA; /* Light text color */
+             font-size: 0.9rem;
+             border-top: 1px solid #444;
+             width: 100%; /* Full width across the page */
+             text-align: center; /* Center the footer text */
+         }
+ 
+         .footer a {
+             color: #FFD700; /* Gold for links */
+             text-decoration: none;
+         }
+ 
+         .footer a:hover {
+             text-decoration: underline;
+         }
+ 
+         .footer p {
+             margin: 5px 0;
+         }
+ 
+         /* Navigation bar styles */
+         .navbar {
+             background-color: transparent; /* Transparent background */
+             padding: 10px 20px;
+         }
+ 
+         .navbar a {
+             color: #E0DFCA; /* Text color for links */
+             margin-right: 15px;
+             text-decoration: none;
+         }
+ 
+         .nav-item-nav-link {
+             color: #FFD700; /* Gold color on hover */
+         }
+ 
+         html {
+             scroll-behavior: smooth; /* Enable smooth scrolling */
+         }
+ 
+ 
+         .switch {
+             position: relative;
+             display: inline-block;
+             width: 50px;
+             height: 26px;
+             margin-left: 15px;
+         }
+ 
+         .switch input {
+             opacity: 0;
+             width: 0;
+             height: 0;
+         }
+ 
+         .slider {
+             position: absolute;
+             cursor: pointer;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background-color: #ccc;
+             transition: 0.4s;
+             border-radius: 34px;
+         }
+ 
+         .slider::before {
+             position: absolute;
+             content: "";
+             height: 22px;
+             width: 22px;
+             left: 2px;
+             bottom: 2px;
+             background-color: white;
+             transition: 0.4s;
+             border-radius: 50%;
+         }
+ 
+         input:checked + .slider {
+             background-color: #007bff;
+         }
+ 
+         input:checked + .slider::before {
+             transform: translateX(24px);
+         }
+ 
+         .slider.round {
+             border-radius: 34px;
+         }
+ 
+         .slider.round::before {
+             border-radius: 50%;
+         }
+ 
+         .nav-buttons {
+             display: flex;
+             justify-content: space-between;
+             position: absolute;
+             top: 15px;
+             left: 0;
+             right: 0;
+             padding: 0 20px;
+         }
+ 
+         .text-center.py-3 {
+             text-align: center;
+             padding: 1rem 0;
+         }
+ 
+         .toggle-right {
+             display: flex;
+             align-items: center;
+             justify-content: space-between;
+             width: 100%;
+         }
+         .toggle-card {
+             background-color: rgba(255, 255, 255, 0.05);
+             border: 1px solid rgba(255, 255, 255, 0.1);
+             padding: 5px 10px; /* Further reduced padding */
+             border-radius: 8px;
+             margin-bottom: 10px; /* Adjust spacing */
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+         }
+ 
+         #toggleStatusBox {
+             max-width: 470px;
+             padding: 6px 10px;
+             font-size: 12px;
+             line-height: 1.4;
+             text-align: left;
+             border-radius: 6px;
+             border: 1px solid rgba(255, 255, 255, 0.2);
+             position: relative;
+             right: 2px;
+             transition: background-color 0.4s ease;
+         }
+ 
+         #toggleStatus {
+             font-size: 12px; /* Smaller font */
+             display: block;
+             white-space: normal; /* Allow text wrapping */
+         }
+ 
+         .blue-bg {
+             background-color: rgba(0, 123, 255, 0.2);
+             color: #cce6ff;
+         }
+ 
+         .green-bg {
+             background-color: rgba(40, 167, 69, 0.2);
+             color: #d4f8dd;
+         }
+ 
+         #toggleStatusBox span {
+             font-size: 13px; 
+         }
+ 
+ 
+         .switch .slider {
+             background-color: rgba(72, 201, 120, 0.4);
+         }
+ 
+         .switch input:checked + .slider {
+             background-color: rgba(18, 133, 255, 0.544); /* Transparent dark blue */
+         }
+ 
+         .slider::before {
+             background-color: white;
+         }
+         @media (max-width: 576px) {
+             .container {
+                 padding: 30px;
+                 margin-top: 55px;
+ 
+             }
+             .footer-container {
+                 margin-top: 20px;
+             }
+ 
+             .toggle-right {
+                 flex-direction: column;
+                 align-items: flex-start;
+             }
+ 
+             .switch {
+                 margin-bottom: 10px;
+                 margin-left: 0;
+             }
+ 
+             #toggleStatusBox {
+                 width: 100%;
+                 max-width: 510px;
+                 font-size: 13px;
+                 padding: 7px;
+                 right: 0px;
+             }
+ 
+             .toggle-card {
+                 padding: 10px;
+             }
+         }
+         @media (max-width: 400px) {
+             .switch {
+                 width: 45px;
+                 height: 24px;
+             }
+ 
+             .switch .slider::before {
+                 height: 20px;
+                 width: 20px;
+             }
+         }
+         .highlight {
+             background-color: rgba(255, 230, 0, 0.4); /* Light yellow background */
+             padding: 2px 4px;
+             border-radius: 4px;
+         }
+ 
+     </style>
+ </head>
+ <body>
+     <div class="gradient-effect"></div> <!-- Gradient effect layer -->
+ 
+ 
+     <nav class="navbar navbar-expand-lg navbar-dark"></nav>
+ 
+     <div class="nav-buttons">
+         <a href="/contribute" class="btn-custom" style="font-weight: 450;">Contribute a Book</a>
+         <a href="/reserve" class="btn-custom" style="font-weight: 450;">Browse All Books</a>
+     </div>
+ 
+     <div class="container mt-6">
+         <h1>AI Integrated Student Book Guide</h1>
+         <form method="POST" class="mt-4">
+             <div class="form-group">
+                 <label for="search_type">Select Search Type:</label>
+                 <select class="form-control" id="search_type" name="search_type">
+                     <option value="Search by Book">Search by Book</option>
+                     <option value="Search by Author">Search by Author</option>
+                 </select>
+             </div>
+ 
+             <div class="form-group">
+                 <label for="search_input">Enter Author/Book Name:</label>
+                 <input type="text" class="form-control" id="search_input" name="search_input" required>
+             </div>
+ 
+             <!-- Toggle card with switch and status inside -->
+             <div class="toggle-card">
+                 <div class="toggle-right">
+                     <label class="switch">
+                         <input type="checkbox" name="sw_value" id="aiToggle" value="true">
+                         <span class="slider round"></span>
+                     </label>
+                     <div id="toggleStatusBox" class="green-bg"></div>
+ 
+                 </div>
+             </div>
+ 
+             <button type="submit" class="btn btn-primary btn-block mt-3">Search</button>
+         </form>
+     </div>
+ 
+     <div class="container text-center py-3 footer-container">
+         <footer class="site-footer">
+             <div class="footer-content">
+               <p>Presented by Class XII Batch 2024–25<br>
+                 Developed by 
+                 <a href="https://github.com/basil-the-py-developer" target="_blank">Basil</a> and 
+                 <a href="https://github.com/aviyall" target="_blank">Avneeth</a>
+               </p>
+               <p>
+                 In collaboration with B Grid Technologies <br>
+                 <a href="https://basil-the-py-developer.github.io/portfolio" target="_blank">Portfolio</a> |
+                 <a href="https://www.linkedin.com/in/basil-joshua-john-2bb857312/" target="_blank">LinkedIn</a> |
+                 <a href="https://github.com/basil-the-py-developer/AI-Library" target="_blank">GitHub Repo</a>
+               </p>
+             </div>
+           </footer>
+ 
+ 
+     </div>
+ 
+     <script>
+         document.addEventListener("DOMContentLoaded", function () {
+             const toggle = document.getElementById("aiToggle");
+             const statusBox = document.getElementById("toggleStatusBox");
+             const slider = document.querySelector(".slider");
+ 
+             function updateStatusBox(isChecked) {
+                 const isMobile = window.matchMedia("(max-width: 576px)").matches;
+ 
+                 if (isChecked) {
+                     statusBox.classList.remove("green-bg");
+                     statusBox.classList.add("blue-bg");
+                     statusBox.innerHTML = isMobile
+                         ? `<span class="line"><span class="highlight">Detailed Info Mode:</span> Slower, yet precise and</span><br>
+                         <span class="line">in-depth. Ideal for infamous books, deep insights</span><br>
+                         <span class="line">and comprehensive coverage.</span>`
+                         : `<span class="line"><span class="highlight">Detailed Info Mode:</span> Slower, yet precise and in-depth. Ideal for infamous     </span><br>
+                         <span class="line">books deep insights and comprehensive coverage.</span>`;
+                     slider.style.backgroundColor = "rgba(18, 133, 255, 0.544)";
+                 } else {
+                     statusBox.classList.remove("blue-bg");
+                     statusBox.classList.add("green-bg");
+                     statusBox.innerHTML = isMobile
+                         ? `<span class="line"><span class="highlight">Quick Info Mode:</span> Gives fast, clear summaries</span><br>
+                         <span class="line">for well-known books. May not cover obscure or</span><br>
+                         <span class="line">infamous titles because of limited data coverage.</span>`
+                         : `<span class="line"><span class="highlight">Quick Info Mode:</span> Gives fast, clear summaries for well-known books. But</span><br>
+                         <span class="line">may not cover obscure or infamous titles because of limited data coverage.</span>`;
+                     slider.style.backgroundColor = "rgba(72, 201, 120, 0.4)";
+                 }
+             }
+ 
+             // Initial setup
+             updateStatusBox(toggle.checked);
+ 
+             // Toggle event listener
+             toggle.addEventListener("change", function () {
+                 updateStatusBox(this.checked);
+             });
+ 
+             // Update on screen resize to stay responsive
+             window.addEventListener("resize", function () {
+                 updateStatusBox(toggle.checked);
+             });
+         });
+ 
+ 
+ 
+     </script>
+ 
+ </body>
+ </html>
