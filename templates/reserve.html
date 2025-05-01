@@ -12,21 +12,17 @@
     <script src="/_vercel/insights/script.js" async></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
     <style>
-        body { 
-            background: url('/static/back.jpg') no-repeat center center fixed; 
-            background-size: 100% 100%;
+        body {
+            background-image: url('/static/back.jpg');
+            background-size: cover;
+            background-position: center;
             color: #E0DFCA;
             font-family: 'Roboto', sans-serif;
-            margin: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            position: relative;
-            overflow-x: hidden;
+            justify-content: center;
             min-height: 100vh;
-            overflow-y: scroll;
-            scrollbar-width: none;
-            -ms-overflow-style: none; 
+            margin: 0;
         }
         
         body::before {
@@ -248,6 +244,7 @@
         
         .back-btn {
             position: absolute;
+            font-weight: 500;
             top: 20px;
             left: 25px;
             background-color: rgba(0, 0, 145, 0.7);
@@ -346,7 +343,7 @@
     </style>    
 </head>
 <body>
-    <a href="/" class="back-btn" style="font-weight: 450;">Back to Search</a>
+    <a href="/" class="back-btn" >Back to Search</a>
     <div class="container mt-5">
         <h2 class="text-center heading">Available Books</h2>
         <input type="text" id="search-box" class="form-control my-4" placeholder="Search for a book..." />
