@@ -6,6 +6,7 @@
     <title>Search Results</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <script src="/_vercel/insights/script.js" async></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
     <style>
@@ -91,23 +92,26 @@
         }
 
 
-        .btn-primary {
-            margin-top: 10px;
-            align-self: center;
-            color: #E0DFCA;
-            text-decoration: none;
-            font-size: 16px;
-            padding: 10px 17px;
-            background-color: rgba(0, 0, 139, 0.6);
+        .btn.btn-custom {
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: rgba(0, 0, 145, 0.7);
             border-radius: 6px;
-            border: none;
+            color: #ffffff;
+            text-align: center;
+            font-size: 16px;
+            text-decoration: none;
             transition: background-color 0.3s, transform 0.3s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-primary:hover {
-            background-color: rgba(0, 0, 139, 0.8);
+        .btn.btn-custom:hover {
+            background-color: rgba(0, 0, 145, 0.8);
             transform: scale(1.05);
-            color: #E0DFCA;
+            color: #ffffff;
+            text-decoration: none;
         }
 
         pre {
@@ -125,7 +129,7 @@
         }
 
         .list-group-item {
-            background-color: dimgray; 
+            background-color: rgba(43, 43, 43, 0.712); 
             color: white; 
             border: none; 
             border-radius: 8px; 
@@ -149,10 +153,6 @@
         .list-group-item a:hover {
             text-decoration: underline;
         }
-        .list-group-item:has(.star-badge) {
-            min-height: 150px; /* Adjust to your preferred height */
-        }
-
 
         .navbar {
             background-color: transparent;
@@ -174,6 +174,13 @@
             transform: translateX(50%);
             cursor: pointer;
             transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+        @media only screen and (min-width: 901px) {
+            .star-badge {
+                bottom: 35%;
+                right: 10%;
+            }
         }
 
         .star-badge:hover {
@@ -216,8 +223,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="navbar-nav w-100">
             <div class="d-flex justify-content-between w-100">
-                <a href="/" class="btn btn-primary">Back to Search</a>
-                <a href="/reserve" class="btn btn-primary">Reserve a Book</a>
+                <a href="/" class="btn btn-custom" style="font-weight: 450;">Back to Search</a>
+                <a href="/reserve" class="btn btn-custom" style="font-weight: 450;">Browse All Books</a>
             </div>
         </div>
     </nav>

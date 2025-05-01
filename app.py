@@ -26,7 +26,8 @@ redis_client = redis.Redis(
 # Set up rate limiter
 limiter = Limiter(
     get_remote_address,
-    app=app,   
+    app=app,
+    storage_uri=f"redis://default:{redis_pass}@redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com:11307"
 )
 
 def get_geolocation(ip):
@@ -74,7 +75,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/result')
-@limiter.limit("3 per minute") 
+@limiter.limit("10 per minute") 
 def result():
     search_type = request.args.get('search_type')
     search_input = request.args.get('search_input')
@@ -397,4 +398,4 @@ def reserve_book():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
