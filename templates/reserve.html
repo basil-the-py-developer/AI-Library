@@ -36,7 +36,31 @@
             background-size: cover;
             z-index: -1;
         }
-        
+         /* Gradient effect with animation */
+        .gradient-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #dfcbaa 0%, #6284FF 50%, #FF0000 100%);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
         html, body {
             overflow: auto; 
             -ms-overflow-style: none; 
