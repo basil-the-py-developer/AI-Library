@@ -15,6 +15,7 @@ database_password = os.getenv('DATABASE_PASSWORD')
 api_key = os.getenv("API_KEY")
 redis_pass = os.getenv("REDIS_PASS")
 
+
 redis_client = redis.Redis(
     host='redis-11307.c301.ap-south-1-1.ec2.redns.redis-cloud.com',
     port=11307,
@@ -83,9 +84,9 @@ def result():
 
     genai.configure(api_key=api_key)
     if fastmodel:
-        model = genai.GenerativeModel("gemini-2.0-flash-lite")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")
     else:
-        model = genai.GenerativeModel("gemini-2.5-pro-exp-03-25")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         
     db_connection = connect_to_library_db()
     cursor = db_connection.cursor()
@@ -126,7 +127,8 @@ def result():
         response = model.generate_content(
             f"""Get details about {search_input} and books by the author/publisher.
                 Do not use '**' and '##' in your response because it will not work, arrange you response in a pretty manner. 
-                Only include the details, do not include any talks or questions 
+                Only include the details, do not include any talks or questions,
+                There is a possiblity for spelling mistake in the name so do check it, 
                 If {search_input} is invalid or not known, include 'No Information found' in your response."""
 
         )
@@ -177,6 +179,7 @@ def result():
                     You are a helpful assistant for a library app.
 
                     The user has searched for a book titled: "{search_input}".
+                    There is a possibility of spelling mistake in the book name do consider it.
 
                     Your task is to:
                     1. Determine what kind of book it is — for example, is it a novel, story, biography, textbook, dictionary, reference manual, or something else?
@@ -310,7 +313,7 @@ def reserve_book():
             if request.form.get('bk_name') and request.form.get('author_name'):
                 book = request.form.get('bk_name')
                 author = request.form.get('author_name')
-                model = genai.GenerativeModel("gemini-2.0-flash-lite")
+                model = genai.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")
                 response = model.generate_content(
                     f"""Provide detailed and structured information about the book "{book}" by {author}. 
                         Do not write any introduction or conclusion. Use bullet points under each heading. 
@@ -387,7 +390,6 @@ def reserve_book():
                     )
 
         except Exception as e:
-            # Log the error during POST and return a message to the user
             app.logger.error(f"Error during reservation process: {e}")
             message = "An error occurred while processing your reservation."
 
