@@ -180,13 +180,13 @@ def result():
                     You are a helpful assistant for a library app.
 
                     The user has searched for a book titled: "{search_input}".
-                    There is a possibility of spelling mistake in the book name do consider it.
+                    There is a possibility of spelling mistake in the book name so do consider it.
 
                     Your task is to:
                     1. Determine what kind of book it is — for example, is it a novel, story, biography, textbook, dictionary, reference manual, or something else?
-                    2. If the book is a **story-based work** (like a novel, short story collection, or biography), generate a **summary** of its content point wise and add it under the section **Book Summary**.
+                    2. If the book is a **story-based work** (like a novel, short story collection, or biography), generate a half-page **summary** of its content and add it under the section **Book Summary**.
                     3. If the book is **non-narrative**, like a **dictionary**, **encyclopedia**, **manual**, or **technical reference**, do **not** generate a summary. Instead, briefly **describe what the book is about**.
-                    4. If the author's name is known, add detail information in a separate section titled **About the Author**.
+                    4. If the author's name is known, add information in a separate section titled **About the Author**.
                     5. If other informations like **Genre**, **Language**, **Setting**, **Pages**, **Publisher**, **Publication Date** are known. add it to a seperate section **Other details**.
                     5. If the book is not valid or no information is found, reply with **"No summary found."**
 

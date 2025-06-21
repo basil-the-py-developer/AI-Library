@@ -14,15 +14,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reserve.css') }}">
 </head>
 <body>
-    <a href="/" class="back-btn" >Back to Search</a>
-    <div class="container mt-5">
-        <h2 class="text-center heading">Available Books</h2>
-        <input type="text" id="search-box" class="form-control my-4" placeholder="Search for a book..." />
-        
-        <div class="book-grid" id="bookGrid">
-            <!-- Book cards will be inserted here -->
-        </div>
+    <a href="/" class="back-btn" class="nav-buttons" class="btn-custom" style="font-weight: 500;" >Back to Home</a>
+    <!-- Fixed Search Header -->
+<div class="search-header">
+    
+    <input type="text" id="search-box" class="form-control my-2" placeholder="Search for a book..." />
+</div>
+
+<!-- Main Container -->
+<div class="container mt-3 book-container">
+    <div class="book-grid" id="bookGrid">
+        <!-- Book cards will be inserted here -->
     </div>
+</div>
+
+
+
     
     <div class="modal fade" id="reserveModal" tabindex="-1" aria-labelledby="reserveModalLabel" aria-hidden="true">
         <div class="modal-dialog">

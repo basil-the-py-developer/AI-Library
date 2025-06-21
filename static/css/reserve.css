@@ -326,5 +326,50 @@ body {
         font-size: 14px;
     }
     #pagination[style*="display: none"] {
-    display: none !important;
+        display: none !important;
+    }
+    .btn-custom {
+        display: inline-block;
+        padding: 10px 16px;
+        background-color: rgba(0, 0, 145, 0.7);
+        border-radius: 6px;
+        color: #ffffff;
+        text-align: center;
+        font-size: 16px;
+        text-decoration: none;
+        transition: background-color 0.3s, transform 0.3s;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-custom:hover {
+        background-color: rgba(0, 0, 145, 0.8);
+        transform: scale(1.05);
+        color: #ffffff;
+        text-decoration: none;
+    }
+    .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        padding: 0 20px;
+    }
+
+.search-header {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    z-index: 10;
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional for visibility */
+}
+
+.book-grid {
+    margin-top: 150px; /* Adjust based on height of .search-header */
 }

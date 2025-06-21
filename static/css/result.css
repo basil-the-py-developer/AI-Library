@@ -1,0 +1,210 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/static/back.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #E0DFCA;
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    margin: 0;
+    position: relative;
+}
+
+.container {
+    background-color: rgba(18, 18, 18, 0.8); 
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 900px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    max-height: 95vh; 
+    height: 95%; 
+    margin-top: 10px; 
+    overflow-y: auto;
+}
+
+h1 {
+    font-family: 'Poppins', sans-serif;
+    color: #ffffff; 
+}
+
+.text-black {
+    color: white; 
+}
+
+.container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.container::-webkit-scrollbar-thumb {
+    background: #545454;
+    border-radius: 10px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+    background: #232323;
+}
+
+.container::-webkit-scrollbar-track {
+    background: whitesmoke;
+    border-radius: 10px;
+}
+.text-black::-webkit-scrollbar {
+    width: 6px; /* Thin scrollbar width */
+}
+
+.text-black::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 90, 0.8); /* Scrollbar thumb color */
+    border-radius: 10px; /* Rounded corners */
+}
+
+.text-black::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 62, 0.8); /* Hover color */
+}
+
+.text-black::-webkit-scrollbar-track {
+    background: #E0DFCA; /* Track color */
+    border-radius: 10px; /* Rounded corners */
+}
+
+
+.btn.btn-custom {
+    display: inline-block;
+    padding: 10px 16px;
+    background-color: rgba(0, 0, 145, 0.7);
+    border-radius: 6px;
+    color: #ffffff;
+    text-align: center;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn.btn-custom:hover {
+    background-color: rgba(0, 0, 145, 0.8);
+    transform: scale(1.05);
+    color: #ffffff;
+    text-decoration: none;
+}
+.button-grp{
+    margin-top: 20px;
+}
+
+pre {
+    color: #E0DFCA;
+    font-size: 1.0rem;
+    padding: 15px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: hidden;
+    max-width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+}
+
+.list-group-item {
+    background-color: rgba(43, 43, 43, 0.712); 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    margin-bottom: 10px; 
+    padding: 15px;
+}
+
+.list-group-item strong {
+    color: white; 
+}
+
+.list-group-item a {
+    color: #FFD700; 
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    white-space: nowrap; 
+    display: inline-block;
+}
+
+.list-group-item a:hover {
+    text-decoration: unbutton-grpderline;
+}
+
+.navbar {
+    background-color: transparent;
+    padding: 20px 30px; 
+    height: 80px; 
+}
+
+.navbar-nav a {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.star-badge {
+    font-size: 1.4rem;
+    color: gold;
+    position: absolute;
+    bottom: 10px;
+    right: 50%;
+    transform: translateX(50%);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+@media only screen and (min-width: 901px) {
+    .star-badge {
+        bottom: 35%;
+        right: 10%;
+    }
+}
+
+.star-badge:hover {
+    transform: translateX(50%) scale(1.2); 
+    color: #ffd700; 
+}
+
+.star-badge::after {
+    content: "Contributed by " attr(data-contributor);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border-radius: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Tooltip on Hover */
+.star-badge:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-3px); /* Slight lift */
+}
+
+footer {
+    height: 20px; 
+    background-color: transparent;
+    margin-top: auto;
+}

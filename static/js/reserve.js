@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchBooks(currentPage);
         setupReserveForm();
         setupSearchBox();
+        document.getElementById('search-box').focus();
     }
 
     function fetchBooks(page = 1) {
@@ -156,35 +157,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-
-    function bindFormSubmit(form) {
-        const submitButton = form.querySelector('button[type="submit"]');
-        const spinner = submitButton.querySelector('.custom-spinner') || createSpinner(submitButton);
-
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-            spinner.classList.remove('d-none');
-            submitButton.disabled = true;
-
-            const formData = new FormData(form);
-
-            fetch('/get_info', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.text())
-                .then(message => {
-                    spinner.classList.add('d-none');
-                    submitButton.disabled = false;
-                    showPopupMessage(form.closest('.book-card'), message);
-                })
-                .catch(error => {
-                    spinner.classList.add('d-none');
-                    submitButton.disabled = false;
-                    alert('Error: ' + error);
-                });
-        });
-    }
 
     function createSpinner(button) {
         const spinner = document.createElement('span');
