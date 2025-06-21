@@ -362,6 +362,11 @@ def get_info():
     message = response.text.replace('***', '').replace('**', '')
     return message
 
+@app.route('/reserve')
+def reserve_page():
+    return render_template('reserve.html')
+
+
 @app.route('/api/reserve', methods=['POST'])
 def reserve():
     db_connection = connect_to_library_db()
