@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import google.generativeai as genai
 from googlesearch import search
 import psycopg2
+import psycopg2.extras
 import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -275,128 +276,185 @@ def contribution():
 
     return render_template('contribute.html')
 
-@app.route('/reserve', methods=['GET','POST'])
+@app.route('/get_available_books')
+def get_available_books():
+    try:
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 100))
+        offset = (page - 1) * limit
 
-def reserve_book():
-    db_connection = connect_to_library_db()
-    cursor = db_connection.cursor()
-    results=[]
-    if request.method == 'GET':
-        try:
-            query = """SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS", "SHELF_NO", "RACK_NO", "CONTRIBUTED", "IF_YES_NAME" FROM library WHERE "BOOK_STATUS" = 'Available' """
-            cursor.execute(query)
-            books = cursor.fetchall()
-            if books:
-                for book in books:
-                    bk_id, bk_name, author_name, bk_status, shelf_no, rack_no, contributed, contributor = book
-                    results.append({
-                        "bk_name": bk_name,
-                        "bk_id": bk_id,
-                        "bk_status": bk_status,
-                        "author_name": author_name,
-                        "shelf_no": shelf_no,
-                        "rack_no": rack_no,
-                        "contributed": contributed,
-                        "contributor": contributor
-                    })
+        db_connection = connect_to_library_db()
+        cursor = db_connection.cursor()
 
-            return render_template('reserve.html', results=results)
+        count_query = 'SELECT COUNT(*) FROM library WHERE "BOOK_STATUS" = %s;'
+        cursor.execute(count_query, ('Available',))
+        total = cursor.fetchone()[0]
 
-        except Exception as e:
-            app.logger.error(f"Error during database fetch: {e}")
-            return "Error fetching books", 500
-    
+        query = '''
+            SELECT "BK_ID", "BK_NAME", "AUTHOR_NAME", "BOOK_STATUS", "SHELF_NO", "RACK_NO", "CONTRIBUTED", "IF_YES_NAME"
+            FROM library WHERE "BOOK_STATUS" = %s
+            ORDER BY "BK_ID"
+            LIMIT %s OFFSET %s;
+        '''
+        cursor.execute(query, ('Available', limit, offset))
+        books = cursor.fetchall()
 
-    if request.method == 'POST':
-        try:
-            genai.configure(api_key=api_key)
-            if request.form.get('bk_name') and request.form.get('author_name'):
-                book = request.form.get('bk_name')
-                author = request.form.get('author_name')
-                model = genai.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")
-                response = model.generate_content(
-                    f"""Provide detailed and structured information about the book "{book}" by {author}. 
-                        Do not write any introduction or conclusion. Use bullet points under each heading. 
-                        If any section is not applicable to the book, skip it without mentioning that it's skipped. 
-                        Follow this exact format:
+        results = []
+        for book in books:
+            bk_id, bk_name, author_name, bk_status, shelf_no, rack_no, contributed, contributor = book
+            results.append({
+                "bk_id": bk_id,
+                "bk_name": bk_name,
+                "author_name": author_name,
+                "bk_status": bk_status,
+                "shelf_no": shelf_no,
+                "rack_no": rack_no,
+                "contributed": contributed,
+                "contributor": contributor
+            })
 
-                        Title: [Book Title]
-                        Author: [Author Name]
-                        Type: [e.g., Novel, Biography, Academic, Technical, etc.]
-                        Genre: [e.g., Fiction, Non-Fiction, Mystery, etc.]
-                                                                                     
-                        Description: [Brief and informative description of the book]
-                                                                                     
-                        [Main Topics / Themes]:
-                        - [point 1]
-                        - [point 2]
-                                                                                       
-                        [Key Points / Learnings]:
-                        - [point 1]
-                        - [point 2]
-                                                                                           
-                        Author Background:
-                        - [point about the author's background]
-                        - [point about notable achievements]
-                                                                                                                    
-                        Only provide these headings and bullet points. Do not add any other text or explanation. """
-                )
-                        
-                message=response.text.replace('***','').replace('**','')
-                return message
-            
-            elif request.form.get('book_id') and request.form.get('card_id') :
-                book_id = request.form.get('book_id').strip()
-                #user_name = request.form.get('user_name').strip()
-                #contact = request.form.get('contact').strip()
-                card_id = request.form.get('card_id').strip()  # Card ID to identify the user
-                #check for user info
-                query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""
-                cursor.execute(query, (card_id,))
-                user = cursor.fetchone()
+        return jsonify({
+            "books": results,
+            "total": total,
+            "page": page,
+            "limit": limit
+        })
 
-                if user:
-                    query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
-                    cursor.execute(query, (card_id,))
-                    reserved_count = cursor.fetchone()[0]
-
-                    if reserved_count >= 1:
-                        message = "Reservation not confirmed. You have already reserved 1 books, which is the maximum limit."
-                    else:
-                        query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
-                        cursor.execute(query, (book_id,))
-                        book = cursor.fetchone()
-
-                        if book:
-                            bk_name, bk_status = book
-                            if bk_status == "Available":
-                                query = '''
-                                        UPDATE "library" 
-                                        SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s
-                                        WHERE "BK_ID" = %s;
-                                        '''
-                                cursor.execute(query, (int(card_id), book_id)) 
-                                #cursor.execute(query)
-                                db_connection.commit()
-                                message = f"The book '{bk_name}' has been reserved successfully!"
-                            else:
-                                message = f"Sorry, the book '{bk_name}' is currently not available."
-                        else:
-                            message = "Book ID not found. Please check and try again."
-                else:
-                    message = (
-                        "Reservation not confirmed. You are not an existing member of BEN Library. "
-                        "To become a member, borrow your first book directly from the library."
-                    )
-
-        except Exception as e:
-            app.logger.error(f"Error during reservation process: {e}")
-            message = "An error occurred while processing your reservation."
-
+    finally:
         cursor.close()
         db_connection.close()
 
-        return render_template('reservation_result.html', message=message)
+@app.route('/get_info', methods=['POST'])
+def get_info():
+    book = request.form.get('bk_name')
+    author = request.form.get('author_name')
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")
+    response = model.generate_content(
+        f"""Provide detailed and structured information about the book "{book}" by {author}. 
+            Do not write any introduction or conclusion. Use bullet points under each heading. 
+            If any section is not applicable to the book, skip it without mentioning that it's skipped. 
+            Follow this exact format:
+
+            Title: [Book Title]
+            Author: [Author Name]
+            Type: [e.g., Novel, Biography, Academic, Technical, etc.]
+            Genre: [e.g., Fiction, Non-Fiction, Mystery, etc.]
+
+            Description: [Brief and informative description of the book]
+
+            [Main Topics / Themes]:
+            - [point 1]
+            - [point 2]
+
+            [Key Points / Learnings]:
+            - [point 1]
+            - [point 2]
+
+            Author Background:
+            - [point about the author's background]
+            - [point about notable achievements]
+
+            Only provide these headings and bullet points. Do not add any other text or explanation. """
+    )
+
+    message = response.text.replace('***', '').replace('**', '')
+    return message
+
+@app.route('/api/reserve', methods=['POST'])
+def reserve():
+    db_connection = connect_to_library_db()
+    cursor = db_connection.cursor()
+    try:
+        book_id = request.form.get('book_id', '').strip()
+        card_id = request.form.get('card_id', '').strip()
+
+        if not book_id or not card_id:
+            return "Invalid request. Missing book ID or card ID.", 400
+
+        cursor = db_connection.cursor()
+
+        # Check if user exists
+        query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""
+        cursor.execute(query, (card_id,))
+        user = cursor.fetchone()
+
+        if user:
+            # Check reservation count
+            query = """SELECT COUNT(*) FROM "library" WHERE "BOOK_STATUS" = 'Reserved' AND "CARD_ID" = %s ;"""
+            cursor.execute(query, (card_id,))
+            reserved_count = cursor.fetchone()[0]
+
+            if reserved_count >= 1:
+                message = "Reservation not confirmed. You have already reserved 1 book, which is the maximum limit."
+            else:
+                # Check book availability
+                query = """SELECT "BK_NAME", "BOOK_STATUS" FROM "library" WHERE "BK_ID" = %s ;"""
+                cursor.execute(query, (book_id,))
+                book = cursor.fetchone()
+
+                if book:
+                    bk_name, bk_status = book
+                    if bk_status == "Available":
+                        # Update reservation
+                        update_query = '''
+                            UPDATE "library" 
+                            SET "BOOK_STATUS" = 'Reserved', "CARD_ID" = %s
+                            WHERE "BK_ID" = %s;
+                        '''
+                        cursor.execute(update_query, (int(card_id), book_id))
+                        db_connection.commit()
+                        message = f"The book '{bk_name}' has been reserved successfully!"
+                    else:
+                        message = f"Sorry, the book '{bk_name}' is currently not available."
+                else:
+                    message = "Book ID not found. Please check and try again."
+        else:
+            message = (
+                "Reservation not confirmed. You are not an existing member of BEN Library. "
+                "To become a member, borrow your first book directly from the library."
+            )
+
+        return message
+
+    except Exception as e:
+        return f"An error occurred during reservation: {str(e)}", 500
+    finally:
+        if cursor:
+            cursor.close()
+        if db_connection:
+            db_connection.close()
+
+@app.route('/search_books')
+def search_books():
+    query = request.args.get('query', '').strip()
+    if not query:
+        return jsonify({'books': []})
+    conn = connect_to_library_db()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    sql = '''
+        SELECT * FROM "library"
+        WHERE ("BK_NAME" ILIKE %s OR "AUTHOR_NAME" ILIKE %s)
+        AND "BOOK_STATUS" = 'Available'
+        LIMIT 100
+    '''
+    cursor.execute(sql, (f'%{query}%', f'%{query}%'))
+    rows = cursor.fetchall()
+    cursor.close()
+
+    books = [{
+        'bk_id': row['BK_ID'],
+        'bk_name': row['BK_NAME'],
+        'author_name': row['AUTHOR_NAME'],
+        'bk_status': row['BOOK_STATUS'],
+        'shelf_no': row['SHELF_NO'],
+        'rack_no': row['RACK_NO'],
+        'contributed': row.get('CONTRIBUTED', ''),
+        'contributor': row.get('IF_YES_NAME', '')
+    } for row in rows]
+
+    return jsonify({'books': books})
 
 
 if __name__ == '__main__':

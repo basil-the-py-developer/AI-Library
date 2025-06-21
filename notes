@@ -1,0 +1,3 @@
+ messageContent.style.fontFamily = "Fira Code, monospace";
+                messageContent.style.fontStyle = 'Regular';
+                messageContent.style.fontWeight = '400';
