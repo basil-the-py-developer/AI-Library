@@ -8,6 +8,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import redis
 import requests
+import wikipedia
 from datetime import datetime
 
 app = Flask(__name__)
@@ -82,153 +83,298 @@ def result():
     search_type = request.args.get('search_type')
     search_input = request.args.get('search_input')
     fastmodel = request.args.get('ai_model') == 'False' # it was str so converted it to bool
-
-    genai.configure(api_key=api_key)
     if fastmodel:
-        model = genai.GenerativeModel("gemini-2.5-flash-lite-preview-06-17")
-    else:
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash")
         
-    db_connection = connect_to_library_db()
-    cursor = db_connection.cursor()
+        db_connection = connect_to_library_db()
+        cursor = db_connection.cursor()
 
 
-    search_input_upper = search_input.upper()
-    results = []
-    cleaned_response = ""
-    links = []
-
-    if search_type == "Search by Author":
-        query = """
-            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME"
-            FROM library
-            WHERE similarity("AUTHOR_NAME", %s) > 0.3
-            OR "AUTHOR_NAME" ILIKE %s
-            ORDER BY similarity("AUTHOR_NAME", %s) DESC
-            LIMIT 10;
-        """
-        cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
-        books = cursor.fetchall()
-
-        if books:
-            for book in books:
-                bk_name, bk_id, bk_status, author_name, contributed, contributor= book
-                results.append({
-                    "bk_name": bk_name,
-                    "bk_id": bk_id,
-                    "bk_status": bk_status,
-                    "author_name": author_name,
-                    "contributed": contributed,
-                    "contributor": contributor
-                })
-
-        else:
-            pass
-        # Handle the case where no books are found
-        response = model.generate_content(
-            f"""Get details about {search_input} and books by the author/publisher.
-                Do not use '**' and '##' in your response because it will not work, arrange you response in a pretty manner. 
-                Only include the details, do not include any talks or questions,
-                There is a possiblity for spelling mistake in the name so do check it, 
-                If {search_input} is invalid or not known, include 'No Information found' in your response."""
-
-        )
-        cleaned_response = response.text
-
-        if "No Information found" in cleaned_response:
-            # If AI says no results, perform a web search
-            links = list(search(f"Details about the author '{search_input_upper}'", num_results=3))
-            cleaned_response = f"No results found for the author '{search_input}'. Refer to the related links below."
-
-        # return a response for Search by Author
-        return render_template(
-            'result.html',
-            results=results,
-            generated_info=cleaned_response,
-            search_input=search_input,
-            links=links
-        )
-
-
-    elif search_type == "Search by Book":
-        query = """
-            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME"
-            FROM library
-            WHERE similarity("BK_NAME", %s) > 0.3
-            OR "BK_NAME" ILIKE %s
-            ORDER BY similarity("BK_NAME", %s) DESC
-            LIMIT 10;
-        """
-        cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
-        books = cursor.fetchall()
-
+        search_input_upper = search_input.upper()
         results = []
-        if books:
-            for book in books:
-                bk_name, bk_id, bk_status, author_name, contributed, contributor= book
-                results.append({
-                    "bk_name": bk_name,
-                    "bk_id": bk_id,
-                    "bk_status": bk_status,
-                    "author_name": author_name,
-                    "contributed": contributed,
-                    "contributor": contributor
-                })
+        cleaned_response = ""
+        links = []
 
-        response = model.generate_content(
-                f"""
-                    You are a helpful assistant for a library app.
+        if search_type == "Search by Author":
+            query = """
+                SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME", "SHELF_NO", "RACK_NO"
+                FROM library
+                WHERE similarity("AUTHOR_NAME", %s) > 0.3
+                OR "AUTHOR_NAME" ILIKE %s
+                ORDER BY similarity("AUTHOR_NAME", %s) DESC
+                LIMIT 10;
+            """
+            cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
+            books = cursor.fetchall()
 
-                    The user has searched for a book titled: "{search_input}".
-                    There is a possibility of spelling mistake in the book name so do consider it.
+            if books:
+                for book in books:
+                    bk_name, bk_id, bk_status, author_name, contributed, contributor, shelf, rack= book
+                    results.append({
+                        "bk_name": bk_name,
+                        "bk_id": bk_id,
+                        "bk_status": bk_status,
+                        "author_name": author_name,
+                        "contributed": contributed,
+                        "contributor": contributor,
+                        "shelf_no": shelf,
+                        "rack_no": rack
+                    })
 
-                    Your task is to:
-                    1. Determine what kind of book it is — for example, is it a novel, story, biography, textbook, dictionary, reference manual, or something else?
-                    2. If the book is a **story-based work** (like a novel, short story collection, or biography), generate a half-page **summary** of its content and add it under the section **Book Summary**.
-                    3. If the book is **non-narrative**, like a **dictionary**, **encyclopedia**, **manual**, or **technical reference**, do **not** generate a summary. Instead, briefly **describe what the book is about**.
-                    4. If the author's name is known, add information in a separate section titled **About the Author**.
-                    5. If other informations like **Genre**, **Language**, **Setting**, **Pages**, **Publisher**, **Publication Date** are known. add it to a seperate section **Other details**.
-                    5. If the book is not valid or no information is found, reply with **"No summary found."**
+            else:
+                pass
+            # Handle the case where no books are found
+            response = model.generate_content(
+                f"""Get details about {search_input} and books by the author/publisher.
+                    Do not use '**' and '##' in your response because it will not work, arrange you response in a pretty manner. 
+                    Only include the details, do not include any talks or questions,
+                    There is a possiblity for spelling mistake in the name so do check it, 
+                    If {search_input} is invalid or not known, include 'No Information found' in your response."""
 
-                    **Important:** Do not include phrases like "Okay, I'm ready", "Here's how I will respond", or any introduction. Just output the clean result starting with the relevant section title.
-                    
-                    Use clear formatting like this:
-                    [Title (In most cases it should be the name of the book)]
+            )
+            cleaned_response = response.text
 
-                    **Book Summary**
-                    [response here]
+            if "No Information found" in cleaned_response:
+                # If AI says no results, perform a web search
+                links = list(search(f"Details about the author '{search_input_upper}'", num_results=3))
+                cleaned_response = f"No results found for the author '{search_input}'. Refer to the related links below."
 
-                    **About the Author**
-                    [optional section here]
+            # return a response for Search by Author
+            return render_template(
+                'result.html',
+                results=results,
+                generated_info=cleaned_response,
+                search_input=search_input,
+                links=links
+            )
 
-                    **Other details:**
-                    [response here]
 
-                    Be concise, fact-based, and avoid making up details. If the title sounds generic or non-narrative, do not treat it as a story.
-                """
-        )
+        elif search_type == "Search by Book":
+            query = """
+                SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME", "SHELF_NO", "RACK_NO"
+                FROM library
+                WHERE similarity("BK_NAME", %s) > 0.3
+                OR "BK_NAME" ILIKE %s
+                ORDER BY similarity("BK_NAME", %s) DESC
+                LIMIT 10;
+            """
+            cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
+            books = cursor.fetchall()
+
+            results = []
+            if books:
+                for book in books:
+                    bk_name, bk_id, bk_status, author_name, contributed, contributor, shelf, rack= book
+                    results.append({
+                        "bk_name": bk_name,
+                        "bk_id": bk_id,
+                        "bk_status": bk_status,
+                        "author_name": author_name,
+                        "contributed": contributed,
+                        "contributor": contributor,
+                        "shelf_no": shelf,
+                        "rack_no": rack
+                    })
+
+            response = model.generate_content(
+                    f"""
+                        You are a helpful assistant for a library app.
+
+                        The user has searched for a book titled: "{search_input}".
+                        There is a possibility of spelling mistake in the book name so do consider it.
+
+                        Your task is to:
+                        1. Determine what kind of book it is — for example, is it a novel, story, biography, textbook, dictionary, reference manual, or something else?
+                        2. If the book is a **story-based work** (like a novel, short story collection, or biography), generate a half-page **summary** of its content and add it under the section **Book Summary**.
+                        3. If the book is **non-narrative**, like a **dictionary**, **encyclopedia**, **manual**, or **technical reference**, do **not** generate a summary. Instead, briefly **describe what the book is about**.
+                        4. If the author's name is known, add information in a separate section titled **About the Author**.
+                        5. If other informations like **Genre**, **Language**, **Setting**, **Pages**, **Publisher**, **Publication Date** are known. add it to a seperate section **Other details**.
+                        5. If the book is not valid or no information is found, reply with **"No summary found."**
+
+                        **Important:** Do not include phrases like "Okay, I'm ready", "Here's how I will respond", or any introduction. Just output the clean result starting with the relevant section title.
+                        
+                        Use clear formatting like this:
+                        [Title (In most cases it should be the name of the book)]
+
+                        **Book Summary**
+                        [response here]
+
+                        **About the Author**
+                        [optional section here]
+
+                        **Other details:**
+                        [response here]
+
+                        Be concise, fact-based, and avoid making up details. If the title sounds generic or non-narrative, do not treat it as a story.
+                    """
+            )
 
 
-        if "No summary found" in response.text:
-            links = []
-            # Search online for additional details when no summary is found
-            bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
+            if "No summary found" in response.text:
+                links = []
+                # Search online for additional details when no summary is found
+                bk_links = list(search(f"Get summary of the novel '{search_input_upper}'", num_results=3))
 
-            # Update response to include a note about related links
-            cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
+                # Update response to include a note about related links
+                cleaned_response = f"No summary found for the book '{search_input}'. Refer to the related links below for more information."
+            else:
+                cleaned_response = response.text.replace('***', '').replace('**', '').replace('##', '').replace('#', '')
+
+            return render_template(
+                'result.html',
+                results=results, 
+                generated_info=cleaned_response, 
+                search_input=search_input,
+                links=links 
+            )
+
+        cursor.close()
+        db_connection.close()
+    else:
+        db_connection = connect_to_library_db()
+        cursor = db_connection.cursor()
+
+        search_input_upper = search_input.upper()
+        results = []
+        cleaned_response = ""
+        links = []
+
+        if search_type == "Search by Author":
+            query = """
+                SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME", "SHELF_NO", "RACK_NO"
+                FROM library
+                WHERE similarity("AUTHOR_NAME", %s) > 0.3
+                OR "AUTHOR_NAME" ILIKE %s
+                ORDER BY similarity("AUTHOR_NAME", %s) DESC
+                LIMIT 10;
+            """
+            cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
+            books = cursor.fetchall()
+
+            if books:
+                for book in books:
+                    bk_name, bk_id, bk_status, author_name, contributed, contributor, shelf, rack = book
+                    results.append({
+                        "bk_name": bk_name,
+                        "bk_id": bk_id,
+                        "bk_status": bk_status,
+                        "author_name": author_name,
+                        "contributed": contributed,
+                        "contributor": contributor,
+                        "shelf_no": shelf,
+                        "rack_no": rack
+                    })
+
+            exact_title = get_exact_title(search_input)
+            if exact_title:
+                summary = get_detailed_summary(exact_title)
+                if summary.startswith("Disambiguation Error") or summary.startswith("Page not found"):
+                    cleaned_response = f"No detailed summary found on Wikipedia for '{search_input}'. Try refining your search."
+                    links = list(search(f"Details about the author '{search_input}' on Wikipedia", num_results=3))
+                else:
+                    cleaned_response = summary
+            else:
+                cleaned_response = f"No matching Wikipedia page found for '{search_input}'."
+                links = list(search(f"Details about the author '{search_input}' on Wikipedia", num_results=3))
+
+            cursor.close()
+            db_connection.close()
+
+            return render_template(
+                'result.html',
+                results=results,
+                generated_info=cleaned_response,
+                search_input=search_input,
+                links=links
+            )
+
+        elif search_type == "Search by Book":
+            query = """
+                SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME", "SHELF_NO", "RACK_NO"
+                FROM library
+                WHERE similarity("BK_NAME", %s) > 0.3
+                OR "BK_NAME" ILIKE %s
+                ORDER BY similarity("BK_NAME", %s) DESC
+                LIMIT 10;
+            """
+            cursor.execute(query, (search_input_upper, f"%{search_input_upper}%", search_input_upper))
+            books = cursor.fetchall()
+
+            if books:
+                for book in books:
+                    bk_name, bk_id, bk_status, author_name, contributed, contributor, shelf, rack = book
+                    results.append({
+                        "bk_name": bk_name,
+                        "bk_id": bk_id,
+                        "bk_status": bk_status,
+                        "author_name": author_name,
+                        "contributed": contributed,
+                        "contributor": contributor,
+                        "shelf_no": shelf,
+                        "rack_no": rack
+                    })
+
+            exact_title = get_exact_title(search_input)
+            if exact_title:
+                summary = get_detailed_summary(exact_title)
+                if summary.startswith("Disambiguation Error") or summary.startswith("Page not found"):
+                    cleaned_response = f"No detailed summary found on Wikipedia for '{search_input}'. Try refining your search."
+                    links = list(search(f"Get summary of the novel '{search_input}'", num_results=3))
+                else:
+                    cleaned_response = summary
+            else:
+                cleaned_response = f"No matching Wikipedia page found for '{search_input}'."
+                links = list(search(f"Get summary of the novel '{search_input}'", num_results=3))
+
+            cursor.close()
+            db_connection.close()
+
+            return render_template(
+                'result.html',
+                results=results,
+                generated_info=cleaned_response,
+                search_input=search_input,
+                links=links
+            )
+
+
+def get_exact_title(search_term):
+    """Uses Wikipedia Search API to find the best-matching title."""
+    search_url = "https://en.wikipedia.org/w/api.php"
+    params = {
+        "action": "query",
+        "list": "search",
+        "srsearch": search_term,
+        "format": "json"
+    }
+
+    try:
+        response = requests.get(search_url, params=params, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("query", {}).get("search"):
+            return data["query"]["search"][0]["title"]
         else:
-            cleaned_response = response.text.replace('***', '').replace('**', '').replace('##', '').replace('#', '')
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return None
+    
+def get_detailed_summary(title):
+    """Uses the wikipedia package to fetch the full article content."""
+    try:
+        wikipedia.set_lang("en")
+        page = wikipedia.page(title)
+        return page.content
+    except wikipedia.DisambiguationError as e:
+        return f"Disambiguation Error. Try one of these:\n{', '.join(e.options[:5])}..."
+    except wikipedia.PageError:
+        return "Page not found."
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-        return render_template(
-            'result.html',
-            results=results,  # Pass any database results or an empty list if none
-            generated_info=cleaned_response, 
-            search_input=search_input,
-            links=links  # Pass related links
-        )
 
-    cursor.close()
-    db_connection.close()
 
 
 @app.route('/contribute', methods=['GET', 'POST'])

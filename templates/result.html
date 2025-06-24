@@ -38,17 +38,19 @@
                     <ul class="list-group">
                         {% for result in results %}
                             <li class="list-group-item text-black">
-                                <strong>Book Name:</strong> {{ result.bk_name }}<br>
-                                <strong>Book ID:</strong> {{ result.bk_id }}<br>
-                                <strong>Author Name:</strong> {{ result.author_name }}<br>
-                                <strong>Status:</strong> {{ result.bk_status }}<br>
+                                Book Name: <strong>{{ result.bk_name }}</strong><br>
+                                Author Name: <strong>{{ result.author_name }}</strong><br>
+                                Status: <strong>{{ result.bk_status }}</strong><br>
+                                Shelf No:  <strong>{{ result.shelf_no }}</strong>
+                                Rack No:  <strong>{{ result.rack_no }}</strong><br>
                                 {% if result.bk_status == 'Issued' %}
-                                    <strong>Available by:</strong> {{ result.due_date }}<br>
+                                    Available by: <strong>{{ result.due_date }}</strong><br>
                                 {% endif %}
                                 {% if result.contributed == 'YES' %}
                                     <span class="star-badge" data-contributor="{{ result.contributor }}">⭐</span>
                                 {% endif %}
                             </li>
+
                         {% endfor %}
                     </ul>
                 {% endif %}
