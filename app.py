@@ -100,7 +100,7 @@ def result():
 
     if search_type == "Search by Author":
         query = """
-            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME"
+            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME", "SHELF_NO", "RACK_NO"
             FROM library
             WHERE similarity("AUTHOR_NAME", %s) > 0.3
             OR "AUTHOR_NAME" ILIKE %s
@@ -112,14 +112,16 @@ def result():
 
         if books:
             for book in books:
-                bk_name, bk_id, bk_status, author_name, contributed, contributor= book
+                bk_name, bk_id, bk_status, author_name, contributed, contributor, shelf, rack= book
                 results.append({
                     "bk_name": bk_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
                     "author_name": author_name,
                     "contributed": contributed,
-                    "contributor": contributor
+                    "contributor": contributor,
+                    "shelf_no": shelf,
+                    "rack_no": rack
                 })
 
         else:
@@ -152,7 +154,7 @@ def result():
 
     elif search_type == "Search by Book":
         query = """
-            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME"
+            SELECT "BK_NAME", "BK_ID", "BOOK_STATUS", "AUTHOR_NAME", "CONTRIBUTED", "IF_YES_NAME", "SHELF_NO", "RACK_NO"
             FROM library
             WHERE similarity("BK_NAME", %s) > 0.3
             OR "BK_NAME" ILIKE %s
@@ -165,14 +167,16 @@ def result():
         results = []
         if books:
             for book in books:
-                bk_name, bk_id, bk_status, author_name, contributed, contributor= book
+                bk_name, bk_id, bk_status, author_name, contributed, contributor, shelf, rack= book
                 results.append({
                     "bk_name": bk_name,
                     "bk_id": bk_id,
                     "bk_status": bk_status,
                     "author_name": author_name,
                     "contributed": contributed,
-                    "contributor": contributor
+                    "contributor": contributor,
+                    "shelf_no": shelf,
+                    "rack_no": rack
                 })
 
         response = model.generate_content(
