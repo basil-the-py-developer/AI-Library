@@ -248,7 +248,7 @@ def contribution():
 
         try:
             # Check if the card ID exists in the 'user' table
-            cursor.execute("""SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s;""", (card_id,))
+            cursor.execute("""SELECT "CARD_ID" FROM "users" WHERE "CARD_ID" = %s;""", (card_id,))
             user = cursor.fetchone()
 
             if not user:
@@ -385,7 +385,7 @@ def reserve():
         cursor = db_connection.cursor()
 
         # Check if user exists
-        query = """SELECT "CARD_ID" FROM "user" WHERE "CARD_ID" = %s ;"""
+        query = """SELECT "CARD_ID" FROM "users" WHERE "CARD_ID" = %s ;"""
         cursor.execute(query, (card_id,))
         user = cursor.fetchone()
 
